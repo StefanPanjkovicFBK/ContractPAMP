@@ -1,0 +1,103 @@
+-- Flattened FSM model generated from stdin
+-- Dumped layers are: model Untime_monitors 
+
+MODULE main
+-- Input variables from layer 'model'
+IVAR
+tswitch.EVENT : {SWITCH_START, SWITCH_END, STUTTER};
+tfix.EVENT : {FIX_START, FIX_END, STUTTER};
+ccontroller.EVENT : {FIX, SWITCH, STUTTER};
+__delta : real;
+
+-- Input variables from layer 'Untime_monitors'
+-- State variables from layer 'model'
+VAR
+global_clock : real;
+tswitch.location : {OFF, SWITCHING};
+tswitch.start : boolean;
+tswitch.end : boolean;
+tfix.location : {OFF, FIXING};
+tfix.start : boolean;
+tfix.end : boolean;
+ccontroller.location : {BROKEN, FIXED};
+ccontroller.x : real;
+time : real;
+__iota : boolean;
+
+-- State variables from layer 'Untime_monitors'
+-- Frozen variables from layer 'model'
+-- Frozen variables from layer 'Untime_monitors'
+-- Functions from layer 'model'
+-- Functions from layer 'Untime_monitors'
+-- Defines from layer 'model'
+DEFINE
+__is_timed_trans := __expr0;
+
+-- Defines from layer 'Untime_monitors'
+CONSTANTS
+ OFF, SWITCHING, SWITCH_START, SWITCH_END, STUTTER, FIXING, FIX_START, FIX_END, BROKEN, FIXED, FIX, SWITCH ;
+
+-- Assignments from layer 'model'
+
+-- Assignments from layer 'Untime_monitors'
+
+INIT
+ tswitch.location = OFF
+
+INIT
+ tfix.location = OFF
+
+INIT
+ __expr1
+
+INIT
+ ccontroller.x = 0
+
+INIT
+ global_clock = 0
+
+INIT
+ time = 0
+
+INIT
+ __iota
+
+
+INVAR
+ (__expr2 -> ccontroller.x <= 5)
+
+
+TRANS
+ (!__expr0 | (__delta > 0 & (((((((((next(global_clock) = global_clock + __delta & next(tswitch.location) = tswitch.location) & next(tswitch.start) = tswitch.start) & next(tswitch.end) = tswitch.end) & next(tfix.location) = tfix.location) & next(tfix.start) = tfix.start) & next(tfix.end) = tfix.end) & next(ccontroller.location) = ccontroller.location) & __expr3) & next(time) = time + __delta)))
+
+TRANS
+ (__expr0 | ((((((((((tswitch.EVENT = STUTTER -> tswitch.location = next(tswitch.location)) & (tswitch.EVENT = SWITCH_START -> (tswitch.location = OFF & next(tswitch.location) = SWITCHING))) & (__expr4 -> (tswitch.location = SWITCHING & next(tswitch.location) = OFF))) & (tswitch.start <-> tswitch.EVENT = SWITCH_START)) & (tswitch.end <-> __expr4)) & (((((tfix.EVENT = STUTTER -> tfix.location = next(tfix.location)) & (tfix.EVENT = FIX_START -> (tfix.location = OFF & next(tfix.location) = FIXING))) & (__expr5 -> (tfix.location = FIXING & next(tfix.location) = OFF))) & (tfix.start <-> tfix.EVENT = FIX_START)) & (tfix.end <-> __expr5))) & (((ccontroller.EVENT = STUTTER -> (ccontroller.location = next(ccontroller.location) & __expr6)) & (ccontroller.EVENT = FIX -> ((((__expr2 & __expr7) & next(ccontroller.x) = ccontroller.x + 1) | ((__expr2 & __expr8) & __expr6)) | ((__expr1 & __expr8) & __expr3)))) & (ccontroller.EVENT = SWITCH -> ((__expr1 & __expr7) & next(ccontroller.x) = 0)))) & ((global_clock = next(global_clock) & (__expr4 <-> ccontroller.EVENT = SWITCH)) & (__expr5 <-> ccontroller.EVENT = FIX))) & __delta = 0) & (__iota & next(__iota))))
+
+TRANS
+ (!(!__iota | !next(__iota)) | __expr0)
+
+
+
+
+
+
+
+-- Symbols introduced by the dumper:
+DEFINE __expr1 := ccontroller.location = FIXED ;
+
+DEFINE __expr6 := ccontroller.x = next(ccontroller.x) ;
+
+DEFINE __expr0 := time != next(time) ;
+
+DEFINE __expr8 := next(ccontroller.location) = FIXED ;
+
+DEFINE __expr2 := ccontroller.location = BROKEN ;
+
+DEFINE __expr5 := tfix.EVENT = FIX_END ;
+
+DEFINE __expr4 := tswitch.EVENT = SWITCH_END ;
+
+DEFINE __expr7 := next(ccontroller.location) = BROKEN ;
+
+DEFINE __expr3 := next(ccontroller.x) = ccontroller.x ;
+

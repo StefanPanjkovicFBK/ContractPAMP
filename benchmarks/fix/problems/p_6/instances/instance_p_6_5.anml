@@ -1,0 +1,22 @@
+instance Item empty, item1, item2, item3, item4, item5;
+
+[start] holding(empty) := true;
+[start] holding(item1) := false;
+[start] holding(item2) := false;
+[start] holding(item3) := false;
+[start] holding(item4) := false;
+[start] holding(item5) := false;
+
+[start] fixed(empty) := true;
+[start] fixed(item1) := false;
+[start] fixed(item2) := false;
+[start] fixed(item3) := false;
+[start] fixed(item4) := false;
+[start] fixed(item5) := false;
+
+[end] fixed(item1);
+[end] fixed(item2);
+[end] fixed(item3);
+[end] fixed(item4);
+[end] fixed(item5);
+[end] holding(empty);

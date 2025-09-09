@@ -1,0 +1,63 @@
+instance Position pos1, pos2, pos3, pos4, pos5;
+instance Body s1, s2, s3, s4, s5;
+
+p(s1) := pos1;
+p(s2) := pos2;
+p(s3) := pos3;
+p(s4) := pos4;
+p(s5) := pos5;
+
+distance(pos1, pos1) := 0;
+distance(pos1, pos2) := 1;
+distance(pos1, pos3) := 1;
+distance(pos1, pos4) := 1;
+distance(pos1, pos5) := 1;
+
+distance(pos2, pos1) := 1;
+distance(pos2, pos2) := 0;
+distance(pos2, pos3) := 1;
+distance(pos2, pos4) := 1;
+distance(pos2, pos5) := 1;
+
+distance(pos3, pos1) := 1;
+distance(pos3, pos2) := 1;
+distance(pos3, pos3) := 0;
+distance(pos3, pos4) := 1;
+distance(pos3, pos5) := 1;
+
+distance(pos4, pos1) := 1;
+distance(pos4, pos2) := 1;
+distance(pos4, pos3) := 1;
+distance(pos4, pos4) := 0;
+distance(pos4, pos5) := 1;
+
+distance(pos5, pos1) := 1;
+distance(pos5, pos2) := 1;
+distance(pos5, pos3) := 1;
+distance(pos5, pos4) := 1;
+distance(pos5, pos5) := 0;
+
+[start] image_taken(s1) := false;
+[start] image_taken(s2) := false;
+[start] image_taken(s3) := false;
+[start] image_taken(s4) := false;
+[start] image_taken(s5) := false;
+
+[start] image_transmitted(s1) := false;
+[start] image_transmitted(s2) := false;
+[start] image_transmitted(s3) := false;
+[start] image_transmitted(s4) := false;
+[start] image_transmitted(s5) := false;
+
+[start] pos := pos1;
+
+[start] charging := false;
+[start] transmitting := false;
+[start] observing := false;
+[start] moving := false;
+
+[end] image_transmitted(s1);
+[end] image_transmitted(s2);
+[end] image_transmitted(s3);
+[end] image_transmitted(s4);
+[end] image_transmitted(s5);

@@ -1,0 +1,92 @@
+@TIME_DOMAIN continuous
+
+MODULE T_SWITCH
+
+VAR location : {OFF, SWITCHING};
+    start : boolean;
+    end : boolean;
+
+IVAR EVENT : {SWITCH_START, SWITCH_END, STUTTER};
+
+INIT (location = OFF);
+
+TRANS
+
+(EVENT = STUTTER -> location = next(location)) &
+
+(EVENT = SWITCH_START -> location = OFF & next(location) = SWITCHING) &
+
+(EVENT = SWITCH_END -> location = SWITCHING & next(location) = OFF) &
+
+(start <-> EVENT = SWITCH_START) &
+
+(end <-> EVENT = SWITCH_END);
+
+MODULE T_FIX
+
+VAR location : {OFF, FIXING};
+    start : boolean;
+    end : boolean;
+
+IVAR EVENT : {FIX_START, FIX_END, STUTTER};
+
+INIT (location = OFF);
+
+TRANS
+
+(EVENT = STUTTER -> location = next(location)) &
+
+(EVENT = FIX_START -> location = OFF & next(location) = FIXING) &
+
+(EVENT = FIX_END -> location = FIXING & next(location) = OFF) &
+
+(start <-> EVENT = FIX_START) &
+
+(end <-> EVENT = FIX_END);
+
+MODULE C_CONTROLLER
+
+VAR location : {BROKEN, FIXED};
+    x : real;
+
+IVAR EVENT : {FIX, SWITCH, STUTTER};
+
+INIT (location = FIXED) & (x = 0);
+
+INVAR
+
+(location = BROKEN -> x <= 5)
+
+TRANS
+
+(EVENT = STUTTER -> location = next(location) & x = next(x)) &
+
+(EVENT = FIX -> (location = BROKEN & next(location) = BROKEN & next(x) = x + 1) | (location = BROKEN & next(location) = FIXED & x = next(x)) | (location = FIXED & next(location) = FIXED & next(x) = x)) &
+
+(EVENT = SWITCH -> location = FIXED & next(location) = BROKEN & next(x) = 0);
+
+
+MODULE main
+
+VAR
+
+global_clock : clock;
+
+tswitch : T_SWITCH();
+
+tfix : T_FIX();
+
+ccontroller : C_CONTROLLER();
+
+INIT
+
+(global_clock = 0);
+
+TRANS
+
+(global_clock = next(global_clock)) &
+
+(tswitch.EVENT = SWITCH_END <-> ccontroller.EVENT = SWITCH) &
+
+(tfix.EVENT = FIX_END <-> ccontroller.EVENT = FIX);
+

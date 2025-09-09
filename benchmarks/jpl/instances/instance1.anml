@@ -1,0 +1,19 @@
+instance Position pos1;
+instance Body s1;
+
+p(s1) := pos1;
+
+distance(pos1, pos1) := 0;
+
+[start] image_taken(s1) := false;
+
+[start] image_transmitted(s1) := false;
+
+[start] pos := pos1;
+
+[start] charging := false;
+[start] transmitting := false;
+[start] observing := false;
+[start] moving := false;
+
+[end] image_transmitted(s1);

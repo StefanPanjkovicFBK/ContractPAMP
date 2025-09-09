@@ -1,0 +1,56 @@
+type Position;
+type Body;
+
+constant Position p(Body s);
+constant float distance(Position p1, Position p2);
+
+fluent boolean image_taken(Body s);
+fluent boolean image_transmitted(Body s);
+fluent Position pos;
+fluent boolean charging;
+fluent boolean transmitting;
+fluent boolean observing;
+fluent boolean moving;
+
+action CHARGE() {
+    duration >= 100 and duration <= 200;
+
+    [start] (not charging) and (not transmitting) and (not observing) and (not moving);
+    [start] charging := true;
+
+    [end] charging := false;
+};
+
+action DSN(Body s) {
+    duration >= 50 and duration <= 100;
+
+    [start] (not charging) and (not transmitting) and (not observing) and (not moving);
+    [start] image_taken(s);
+    [start] transmitting := true;
+
+    [end] image_transmitted(s) := true;
+    [end] transmitting := false;
+};
+
+action SBO(Body s) {
+    duration >= 150 and duration <= 200;
+
+    [start] (not charging) and (not transmitting) and (not observing) and (not moving);
+    [start] pos == p(s);
+    [start] observing := true;
+
+    [end] image_taken(s) := true;
+    [end] observing := false;
+};
+
+action TCM(Position from, Position to) {
+    duration := distance(from, to);
+
+    [start] (not charging) and (not transmitting) and (not observing) and (not moving);
+    [start] pos == from;
+    [start] from != to;
+    [start] moving := true;
+
+    [end] pos := to;
+    [end] moving := false;
+};

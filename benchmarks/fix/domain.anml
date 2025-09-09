@@ -1,0 +1,24 @@
+type Item;
+
+fluent boolean holding(Item item);
+fluent boolean fixed(Item item);
+
+action switch(Item prev_item, Item next_item) {
+    duration := 1;
+
+    [start] holding(prev_item);
+    [start] next_item != prev_item;
+    [start] holding(prev_item) := false;
+
+    [end] holding(next_item) := true;
+};
+
+action fix(Item item) {
+    duration := 5;
+
+    [start] item != empty;
+
+    [all] holding(item);
+
+    [end] fixed(item) := true;
+};
