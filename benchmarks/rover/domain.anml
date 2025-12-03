@@ -1,0 +1,26 @@
+type Location;
+
+constant rational distance(Location l1, Location l2);
+
+fluent boolean robot_at(Location l);
+fluent boolean msg_sent(Location l);
+
+action move(Location from, Location to) {
+    duration := distance(from, to);
+
+    [start] from != to;
+    [start] robot_at(from);
+    [start] robot_at(from) := false;
+
+    [end] robot_at(to) := true;
+};
+
+action comm(Location l) {
+    duration := 20;
+
+    [start] msg_sent(l) == false;
+
+    [all] robot_at(l);
+    
+    [end] msg_sent(l) := true;
+};

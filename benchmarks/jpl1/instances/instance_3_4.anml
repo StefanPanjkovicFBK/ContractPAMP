@@ -1,0 +1,45 @@
+instance Position pos1, pos2, pos3;
+instance Body s1, s2, s3;
+
+p(s1) := pos1;
+p(s2) := pos2;
+p(s3) := pos3;
+
+distance(pos1, pos1) := 0;
+distance(pos1, pos2) := 10;
+distance(pos1, pos3) := 10;
+
+distance(pos2, pos1) := 10;
+distance(pos2, pos2) := 0;
+distance(pos2, pos3) := 10;
+
+distance(pos3, pos1) := 10;
+distance(pos3, pos2) := 10;
+distance(pos3, pos3) := 0;
+
+id(pos1) := 1;
+id(pos2) := 2;
+id(pos3) := 3;
+
+[start] newImages := 0;
+[start] transmittedImages := 0;
+
+[start] image_taken(s1) := 0;
+[start] image_taken(s2) := 0;
+[start] image_taken(s3) := 0;
+
+[start] pos := pos1;
+
+[start] visited(pos1) := true;
+[start] visited(pos2) := false;
+[start] visited(pos3) := false;
+
+[start] charging := false;
+[start] transmitting := false;
+[start] observing := false;
+[start] moving := false;
+
+[end] image_taken(s1) == 4;
+[end] image_taken(s2) == 4;
+[end] image_taken(s3) == 4;
+[end] transmittedImages == 12;

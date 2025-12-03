@@ -1,0 +1,136 @@
+@TIME_DOMAIN continuous
+
+MODULE T_WORK
+
+VAR location : {OFF, READY, RUNNING};
+    __CLOCK__c_2 : clock;
+    start : boolean;
+    end : boolean;
+
+IVAR EVENT : {WORK_START, RUN, WORK_END, STUTTER};
+
+INIT (location = OFF) &
+     (__CLOCK__c_2 = 0);
+
+INVAR
+
+(location = READY -> __CLOCK__c_2 <= 5)
+
+TRANS
+
+(EVENT = WORK_START -> location = OFF & next(location) = READY & next(__CLOCK__c_2) = 0) &
+
+(EVENT = RUN -> location = READY & next(location) = RUNNING & next(__CLOCK__c_2) = __CLOCK__c_2) &
+
+(EVENT = WORK_END -> location = RUNNING & next(location) = OFF & next(__CLOCK__c_2) = __CLOCK__c_2) &
+
+(EVENT = STUTTER -> next(location) = location & next(__CLOCK__c_2) = __CLOCK__c_2) &
+
+(start <-> EVENT = WORK_START) &
+
+(end <-> EVENT = WORK_END);
+
+MODULE T_COOLDOWN
+
+VAR location : {OFF, COOLING};
+    start : boolean;
+    end : boolean;
+
+IVAR EVENT : {COOL_START, COOL_END, STUTTER};
+
+INIT (location = OFF);
+
+TRANS
+
+(EVENT = COOL_START -> location = OFF & next(location) = COOLING) &
+
+(EVENT = COOL_END -> location = COOLING & next(location) = OFF) &
+
+(EVENT = STUTTER -> next(location) = location) &
+
+(start <-> EVENT = COOL_START) &
+
+(end <-> EVENT = COOL_END);
+
+MODULE C_MACHINE
+
+VAR location : {OFF, IDLE, RUNNING, COOLING};
+    __CLOCK__c_1 : clock;
+
+IVAR EVENT : {TURN_ON, RUN, FINISH, COOLED, COOL, STUTTER};
+
+INIT (location = OFF) &
+     (__CLOCK__c_1 = 0);
+
+INVAR
+
+(location = COOLING -> __CLOCK__c_1 <= 10)
+
+TRANS
+
+(EVENT = TURN_ON -> location = OFF & next(location) = IDLE & next(__CLOCK__c_1) = __CLOCK__c_1) &
+
+(EVENT = RUN -> location = IDLE & next(location) = RUNNING & next(__CLOCK__c_1) = __CLOCK__c_1) &
+
+(EVENT = FINISH -> location = RUNNING & next(location) = COOLING & next(__CLOCK__c_1) = 0) &
+
+(EVENT = COOLED -> location = COOLING & next(location) = OFF & __CLOCK__c_1 >= 10 & next(__CLOCK__c_1) = __CLOCK__c_1) &
+
+(EVENT = COOL -> location = COOLING & next(location) = OFF & next(__CLOCK__c_1) = __CLOCK__c_1) &
+
+(EVENT = STUTTER -> next(location) = location & next(__CLOCK__c_1) = __CLOCK__c_1);
+
+MODULE C_CONTROLLER
+
+VAR location : {ON, OFF};
+    __CLOCK__c_3 : clock;
+
+IVAR EVENT : {WORK_DONE, SWITCH_OFF, STUTTER};
+
+INIT (location = ON) &
+     (__CLOCK__c_3 = 0);
+
+INVAR
+
+(location = ON -> __CLOCK__c_3 <= 109)
+
+TRANS
+
+(EVENT = WORK_DONE -> location = ON & next(location) = ON & next(__CLOCK__c_3) = __CLOCK__c_3) &
+
+(EVENT = SWITCH_OFF -> location = ON & next(location) = OFF & __CLOCK__c_3 >= 109 & next(__CLOCK__c_3) = __CLOCK__c_3) &
+
+(EVENT = STUTTER -> next(location) = location & next(__CLOCK__c_3) = __CLOCK__c_3)
+
+
+MODULE main
+
+VAR
+
+global_clock : clock;
+
+twork : T_WORK();
+
+tcooldown : T_COOLDOWN();
+
+cmachine : C_MACHINE();
+
+ccontroller : C_CONTROLLER();
+
+INIT
+
+(global_clock = 0);
+
+TRANS
+
+(global_clock = next(global_clock)) &
+
+(twork.EVENT = WORK_START <-> cmachine.EVENT = TURN_ON) &
+
+(twork.EVENT = RUN <-> cmachine.EVENT = RUN) &
+
+(twork.EVENT = WORK_END <-> cmachine.EVENT = FINISH) &
+
+(twork.EVENT = WORK_END <-> ccontroller.EVENT = WORK_DONE) &
+
+(tcooldown.EVENT = COOL_END <-> cmachine.EVENT = COOL);

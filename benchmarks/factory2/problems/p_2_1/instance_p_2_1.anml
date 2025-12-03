@@ -1,0 +1,6 @@
+steps := 2;
+
+[start] completed_steps := 0;
+[start] battery := 10;
+
+[end] completed_steps == steps;

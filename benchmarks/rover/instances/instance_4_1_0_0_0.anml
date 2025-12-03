@@ -1,0 +1,37 @@
+instance Location L1, L2, L3, L4;
+
+distance(L1, L1) := 0;
+distance(L1, L2) := 0.1;
+distance(L1, L3) := 100;
+distance(L1, L4) := 100;
+
+distance(L2, L1) := 0.1;
+distance(L2, L2) := 0;
+distance(L2, L3) := 0.1;
+distance(L2, L4) := 100;
+
+distance(L3, L1) := 100;
+distance(L3, L2) := 0.1;
+distance(L3, L3) := 0;
+distance(L3, L4) := 0.1;
+
+distance(L4, L1) := 100;
+distance(L4, L2) := 100;
+distance(L4, L3) := 0.1;
+distance(L4, L4) := 0;
+
+[start] robot_at(L1) := true;
+[start] robot_at(L2) := false;
+[start] robot_at(L3) := false;
+[start] robot_at(L4) := false;
+
+[start] msg_sent(L1) := false;
+[start] msg_sent(L2) := false;
+[start] msg_sent(L3) := false;
+[start] msg_sent(L4) := false;
+
+[end] robot_at(L4);
+[end] msg_sent(L1);
+[end] not msg_sent(L2);
+[end] not msg_sent(L3);
+[end] not msg_sent(L4);

@@ -1,0 +1,153 @@
+@TIME_DOMAIN continuous
+
+MODULE T_MOVE
+
+VAR location : {OFF, MOVING};
+    start : boolean;
+    end : boolean;
+
+IVAR EVENT: {MOVE_START, MOVE_END, STUTTER};
+
+INIT (location = OFF);
+
+TRANS
+
+(EVENT = STUTTER -> location = next(location)) &
+
+(EVENT = MOVE_START -> location = OFF & next(location) = MOVING) &  
+
+(EVENT = MOVE_END -> location = MOVING & next(location) = OFF) &
+
+(start <-> EVENT = MOVE_START) &
+
+(end <-> EVENT = MOVE_END);
+
+MODULE T_COMM
+
+VAR location : {OFF, READY, RESUMING, SENDING, SENT};
+    __CLOCK__c_2 : clock;
+    __CLOCK__c_3 : clock;
+    start : boolean;
+    end : boolean;
+
+IVAR EVENT : {COMM_START, TURN_ON, RESUME, RESUMED, TX_START, TX_END, COMM_END, STUTTER};
+
+INIT (location = OFF) &
+     (__CLOCK__c_2 = 0) &
+     (__CLOCK__c_3 = 0);
+
+INVAR
+
+(location = READY -> __CLOCK__c_2 <= 5) &
+
+(location = RESUMING -> __CLOCK__c_3 <= 2) &
+
+(location = SENDING -> __CLOCK__c_2 <= 15)
+
+TRANS
+
+(EVENT = COMM_START -> location = OFF & next(location) = READY & next(__CLOCK__c_2) = 0 & next(__CLOCK__c_3) = __CLOCK__c_3) &
+
+(EVENT = TURN_ON -> location = READY & next(location) = READY & next(__CLOCK__c_2) = __CLOCK__c_2 & next(__CLOCK__c_3) = __CLOCK__c_3) &
+
+(EVENT = RESUME -> location = READY & next(location) = RESUMING & next(__CLOCK__c_2) = __CLOCK__c_2 & next(__CLOCK__c_3) = 0) &
+
+(EVENT = RESUMED -> location = RESUMING & next(location) = READY & next(__CLOCK__c_2) = __CLOCK__c_2 & next(__CLOCK__c_3) = __CLOCK__c_3) &
+
+(EVENT = TX_START -> location = READY & next(location) = SENDING & next(__CLOCK__c_2) = __CLOCK__c_2 & next(__CLOCK__c_3) = __CLOCK__c_3) &
+
+(EVENT = TX_END -> location = SENDING & next(location) = SENT & next(__CLOCK__c_2) = __CLOCK__c_2 & next(__CLOCK__c_3) = __CLOCK__c_3) &
+
+(EVENT = COMM_END -> location = SENT & next(location) = OFF & next(__CLOCK__c_2) = __CLOCK__c_2 & next(__CLOCK__c_3) = __CLOCK__c_3) &
+
+(EVENT = STUTTER -> location = next(location) & __CLOCK__c_2 = next(__CLOCK__c_2) & __CLOCK__c_3 = next(__CLOCK__c_3)) &
+
+(start <-> EVENT = COMM_START) &
+
+(end <-> EVENT = COMM_END);
+
+MODULE C_NAV
+
+VAR location : {OFF, MOVING};
+
+IVAR EVENT: {NAV_START, NAV_END, STUTTER};
+
+INIT (location = OFF);
+
+TRANS
+
+(EVENT = STUTTER -> location = next(location)) &
+
+(EVENT = NAV_START -> location = OFF & next(location) = MOVING) &  
+
+(EVENT = NAV_END -> location = MOVING & next(location) = OFF);
+
+MODULE C_TX
+
+VAR location : {OFF, IDLE, TX, STANDBY};
+    __CLOCK__c_4 : clock;
+    __CLOCK__c_5 : clock;
+
+IVAR EVENT : {TURN_ON, TX_START, TX_END, SUSPEND, RESUME, STUTTER};
+
+INIT (location = OFF) &
+     (__CLOCK__c_4 = 0) &
+     (__CLOCK__c_5 = 0);
+
+INVAR
+
+(location = IDLE -> __CLOCK__c_4 <= 30)
+
+TRANS
+
+(EVENT = TURN_ON -> location = OFF & next(location) = IDLE & next(__CLOCK__c_4) = 0 & next(__CLOCK__c_5) = __CLOCK__c_5) &
+
+(EVENT = TX_START -> location = IDLE & next(location) = TX & next(__CLOCK__c_4) = __CLOCK__c_4 & next(__CLOCK__c_5) = 0) &
+
+(EVENT = TX_END -> location = TX & next(location) = IDLE & next(__CLOCK__c_4) = 0 & __CLOCK__c_5 >= 5 & next(__CLOCK__c_5) = __CLOCK__c_5) &
+
+(EVENT = SUSPEND -> location = IDLE & next(location) = STANDBY & __CLOCK__c_4 >= 30 & next(__CLOCK__c_4) = __CLOCK__c_4 & next(__CLOCK__c_5) = __CLOCK__c_5) &
+
+(EVENT = RESUME -> location = STANDBY & next(location) = IDLE & next(__CLOCK__c_4) = 0 & next(__CLOCK__c_5) = __CLOCK__c_5) &
+
+(EVENT = STUTTER -> next(location) = location & next(__CLOCK__c_4) = __CLOCK__c_4 & next(__CLOCK__c_5) = __CLOCK__c_5);
+
+
+MODULE main
+
+VAR
+
+global_clock : clock;
+
+tmove : T_MOVE();
+
+tcomm : T_COMM();
+
+cnav : C_NAV();
+
+ctx : C_TX();
+
+INIT
+
+(global_clock = 0);
+
+TRANS
+
+(global_clock = next(global_clock)) &
+
+(tmove.EVENT = MOVE_START <-> cnav.EVENT = NAV_START) &
+
+(tmove.EVENT = MOVE_END <-> cnav.EVENT = NAV_END) &
+
+(tcomm.EVENT = TURN_ON <-> ctx.EVENT = TURN_ON) &
+
+(tcomm.EVENT = RESUME <-> ctx.EVENT = RESUME) &
+
+(tcomm.EVENT = TX_START <-> ctx.EVENT = TX_START) &
+
+(tcomm.EVENT = TX_END <-> ctx.EVENT = TX_END);
+
+INVARSPEC
+
+! (tcomm.location = RESUMING);
+

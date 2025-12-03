@@ -1,0 +1,796 @@
+@TIME_DOMAIN continuous
+
+MODULE T_DRIVELEFT
+
+VAR location : {OFF, MOVING};
+    __CLOCK__c : clock;
+    start : boolean;
+    end : boolean;
+
+IVAR EVENT: {DRIVE_START, DRIVE_END, STUTTER};
+
+INIT (location = OFF);
+
+TRANS
+
+(EVENT = STUTTER -> location = next(location) & __CLOCK__c = next(__CLOCK__c)) &
+
+(EVENT = DRIVE_START -> location = OFF & next(location) = MOVING & next(__CLOCK__c) = 0) &
+
+(EVENT = DRIVE_END -> location = MOVING & next(location) = OFF & __CLOCK__c = next(__CLOCK__c)) &
+
+(start <-> EVENT = DRIVE_START) &
+
+(end <-> EVENT = DRIVE_END);
+
+MODULE T_DRIVERIGHT
+
+VAR location : {OFF, MOVING};
+    __CLOCK__c : clock;
+    start : boolean;
+    end : boolean;
+
+IVAR EVENT: {DRIVE_START, DRIVE_END, STUTTER};
+
+INIT (location = OFF);
+
+TRANS
+
+(EVENT = STUTTER -> location = next(location) & __CLOCK__c = next(__CLOCK__c)) &
+
+(EVENT = DRIVE_START -> location = OFF & next(location) = MOVING & next(__CLOCK__c) = 0) &
+
+(EVENT = DRIVE_END -> location = MOVING & next(location) = OFF & __CLOCK__c = next(__CLOCK__c)) &
+
+(start <-> EVENT = DRIVE_START) &
+
+(end <-> EVENT = DRIVE_END);
+
+MODULE T_LOAD
+
+VAR location : {OFF, LOADING};
+    start : boolean;
+    end : boolean;
+
+IVAR EVENT : {LOAD_START, LOAD_END, STUTTER};
+
+INIT (location = OFF);
+
+TRANS
+
+(EVENT = STUTTER -> location = next(location)) &
+
+(EVENT = LOAD_START -> location = OFF & next(location) = LOADING) &
+
+(EVENT = LOAD_END -> location = LOADING & next(location) = OFF) &
+
+(start <-> EVENT = LOAD_START) &
+
+(end <-> EVENT = LOAD_END);
+
+MODULE T_UNLOAD
+
+VAR location : {OFF, UNLOADING};
+    start : boolean;
+    end : boolean;
+
+IVAR EVENT : {UNLOAD_START, UNLOAD_END, STUTTER};
+
+INIT (location = OFF);
+
+TRANS
+
+(EVENT = STUTTER -> location = next(location)) &
+
+(EVENT = UNLOAD_START -> location = OFF & next(location) = UNLOADING) &
+
+(EVENT = UNLOAD_END -> location = UNLOADING & next(location) = OFF) &
+
+(start <-> EVENT = UNLOAD_START) &
+
+(end <-> EVENT = UNLOAD_END);
+
+
+MODULE main
+
+VAR
+
+global_clock : clock;
+
+position : real;
+
+weight : real;
+
+tdriveleft : T_DRIVELEFT();
+
+tdriveright : T_DRIVERIGHT();
+
+tload : T_LOAD();
+
+tunload : T_UNLOAD();
+
+BOOL_driveleft_running : boolean;
+
+BOOL_driveright_running : boolean;
+
+BOOL_load_running : boolean;
+
+BOOL_unload_running : boolean;
+
+INIT
+
+(global_clock = 0) &
+
+(position = 0) &
+
+(weight = 0.1) &
+
+(!BOOL_driveleft_running) & (!BOOL_driveright_running) & (!BOOL_load_running) & (!BOOL_unload_running);
+
+INVAR
+
+(position >= 0) & (position <= 500);
+
+TRANS
+
+(global_clock = next(global_clock)) &
+
+
+((tdriveleft.EVENT = DRIVE_START) -> next(BOOL_driveleft_running)) &
+
+((tdriveleft.EVENT = DRIVE_END) -> !next(BOOL_driveleft_running)) &
+
+((tdriveright.EVENT = DRIVE_START) -> next(BOOL_driveright_running)) &
+
+((tdriveright.EVENT = DRIVE_END) -> !next(BOOL_driveright_running)) &
+
+((tload.EVENT = LOAD_START) -> next(BOOL_load_running)) &
+
+((tload.EVENT = LOAD_END) -> !next(BOOL_load_running)) &
+
+((tunload.EVENT = UNLOAD_START) -> next(BOOL_unload_running)) &
+
+((tunload.EVENT = UNLOAD_END) -> !next(BOOL_unload_running)) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) <= 12.5 -> next(position) = 1000) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 12.5 & (tdriveleft.__CLOCK__c / 0.1) <= 37.5 -> next(position) = position - 25) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 37.5 & (tdriveleft.__CLOCK__c / 0.1) <= 62.5 -> next(position) = position - 50) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 62.5 & (tdriveleft.__CLOCK__c / 0.1) <= 87.5 -> next(position) = position - 75) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 87.5 & (tdriveleft.__CLOCK__c / 0.1) <= 112.5 -> next(position) = position - 100) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 112.5 & (tdriveleft.__CLOCK__c / 0.1) <= 137.5 -> next(position) = position - 125) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 137.5 & (tdriveleft.__CLOCK__c / 0.1) <= 162.5 -> next(position) = position - 150) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 162.5 & (tdriveleft.__CLOCK__c / 0.1) <= 187.5 -> next(position) = position - 175) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 187.5 & (tdriveleft.__CLOCK__c / 0.1) <= 212.5 -> next(position) = position - 200) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 212.5 & (tdriveleft.__CLOCK__c / 0.1) <= 237.5 -> next(position) = position - 225) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 237.5 & (tdriveleft.__CLOCK__c / 0.1) <= 262.5 -> next(position) = position - 250) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 262.5 & (tdriveleft.__CLOCK__c / 0.1) <= 287.5 -> next(position) = position - 275) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 287.5 & (tdriveleft.__CLOCK__c / 0.1) <= 312.5 -> next(position) = position - 300) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 312.5 & (tdriveleft.__CLOCK__c / 0.1) <= 337.5 -> next(position) = position - 325) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 337.5 & (tdriveleft.__CLOCK__c / 0.1) <= 362.5 -> next(position) = position - 350) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 362.5 & (tdriveleft.__CLOCK__c / 0.1) <= 387.5 -> next(position) = position - 375) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 387.5 & (tdriveleft.__CLOCK__c / 0.1) <= 412.5 -> next(position) = position - 400) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 412.5 & (tdriveleft.__CLOCK__c / 0.1) <= 437.5 -> next(position) = position - 425) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 437.5 & (tdriveleft.__CLOCK__c / 0.1) <= 462.5 -> next(position) = position - 450) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 462.5 & (tdriveleft.__CLOCK__c / 0.1) <= 487.5 -> next(position) = position - 475) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 487.5 & (tdriveleft.__CLOCK__c / 0.1) <= 512.5 -> next(position) = position - 500) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 0.1 & (tdriveleft.__CLOCK__c / 0.1) > 512.5 -> next(position) = position - 1000) &
+
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) <= 12.5 -> next(position) = 1000) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 12.5 & (tdriveleft.__CLOCK__c / 1.1) <= 37.5 -> next(position) = position - 25) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 37.5 & (tdriveleft.__CLOCK__c / 1.1) <= 62.5 -> next(position) = position - 50) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 62.5 & (tdriveleft.__CLOCK__c / 1.1) <= 87.5 -> next(position) = position - 75) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 87.5 & (tdriveleft.__CLOCK__c / 1.1) <= 112.5 -> next(position) = position - 100) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 112.5 & (tdriveleft.__CLOCK__c / 1.1) <= 137.5 -> next(position) = position - 125) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 137.5 & (tdriveleft.__CLOCK__c / 1.1) <= 162.5 -> next(position) = position - 150) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 162.5 & (tdriveleft.__CLOCK__c / 1.1) <= 187.5 -> next(position) = position - 175) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 187.5 & (tdriveleft.__CLOCK__c / 1.1) <= 212.5 -> next(position) = position - 200) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 212.5 & (tdriveleft.__CLOCK__c / 1.1) <= 237.5 -> next(position) = position - 225) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 237.5 & (tdriveleft.__CLOCK__c / 1.1) <= 262.5 -> next(position) = position - 250) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 262.5 & (tdriveleft.__CLOCK__c / 1.1) <= 287.5 -> next(position) = position - 275) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 287.5 & (tdriveleft.__CLOCK__c / 1.1) <= 312.5 -> next(position) = position - 300) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 312.5 & (tdriveleft.__CLOCK__c / 1.1) <= 337.5 -> next(position) = position - 325) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 337.5 & (tdriveleft.__CLOCK__c / 1.1) <= 362.5 -> next(position) = position - 350) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 362.5 & (tdriveleft.__CLOCK__c / 1.1) <= 387.5 -> next(position) = position - 375) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 387.5 & (tdriveleft.__CLOCK__c / 1.1) <= 412.5 -> next(position) = position - 400) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 412.5 & (tdriveleft.__CLOCK__c / 1.1) <= 437.5 -> next(position) = position - 425) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 437.5 & (tdriveleft.__CLOCK__c / 1.1) <= 462.5 -> next(position) = position - 450) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 462.5 & (tdriveleft.__CLOCK__c / 1.1) <= 487.5 -> next(position) = position - 475) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 487.5 & (tdriveleft.__CLOCK__c / 1.1) <= 512.5 -> next(position) = position - 500) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 1.1 & (tdriveleft.__CLOCK__c / 1.1) > 512.5 -> next(position) = position - 1000) &
+
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) <= 12.5 -> next(position) = 1000) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 12.5 & (tdriveleft.__CLOCK__c / 2.1) <= 37.5 -> next(position) = position - 25) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 37.5 & (tdriveleft.__CLOCK__c / 2.1) <= 62.5 -> next(position) = position - 50) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 62.5 & (tdriveleft.__CLOCK__c / 2.1) <= 87.5 -> next(position) = position - 75) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 87.5 & (tdriveleft.__CLOCK__c / 2.1) <= 112.5 -> next(position) = position - 100) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 112.5 & (tdriveleft.__CLOCK__c / 2.1) <= 137.5 -> next(position) = position - 125) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 137.5 & (tdriveleft.__CLOCK__c / 2.1) <= 162.5 -> next(position) = position - 150) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 162.5 & (tdriveleft.__CLOCK__c / 2.1) <= 187.5 -> next(position) = position - 175) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 187.5 & (tdriveleft.__CLOCK__c / 2.1) <= 212.5 -> next(position) = position - 200) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 212.5 & (tdriveleft.__CLOCK__c / 2.1) <= 237.5 -> next(position) = position - 225) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 237.5 & (tdriveleft.__CLOCK__c / 2.1) <= 262.5 -> next(position) = position - 250) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 262.5 & (tdriveleft.__CLOCK__c / 2.1) <= 287.5 -> next(position) = position - 275) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 287.5 & (tdriveleft.__CLOCK__c / 2.1) <= 312.5 -> next(position) = position - 300) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 312.5 & (tdriveleft.__CLOCK__c / 2.1) <= 337.5 -> next(position) = position - 325) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 337.5 & (tdriveleft.__CLOCK__c / 2.1) <= 362.5 -> next(position) = position - 350) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 362.5 & (tdriveleft.__CLOCK__c / 2.1) <= 387.5 -> next(position) = position - 375) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 387.5 & (tdriveleft.__CLOCK__c / 2.1) <= 412.5 -> next(position) = position - 400) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 412.5 & (tdriveleft.__CLOCK__c / 2.1) <= 437.5 -> next(position) = position - 425) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 437.5 & (tdriveleft.__CLOCK__c / 2.1) <= 462.5 -> next(position) = position - 450) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 462.5 & (tdriveleft.__CLOCK__c / 2.1) <= 487.5 -> next(position) = position - 475) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 487.5 & (tdriveleft.__CLOCK__c / 2.1) <= 512.5 -> next(position) = position - 500) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 2.1 & (tdriveleft.__CLOCK__c / 2.1) > 512.5 -> next(position) = position - 1000) &
+
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) <= 12.5 -> next(position) = 1000) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 12.5 & (tdriveleft.__CLOCK__c / 3.1) <= 37.5 -> next(position) = position - 25) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 37.5 & (tdriveleft.__CLOCK__c / 3.1) <= 62.5 -> next(position) = position - 50) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 62.5 & (tdriveleft.__CLOCK__c / 3.1) <= 87.5 -> next(position) = position - 75) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 87.5 & (tdriveleft.__CLOCK__c / 3.1) <= 112.5 -> next(position) = position - 100) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 112.5 & (tdriveleft.__CLOCK__c / 3.1) <= 137.5 -> next(position) = position - 125) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 137.5 & (tdriveleft.__CLOCK__c / 3.1) <= 162.5 -> next(position) = position - 150) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 162.5 & (tdriveleft.__CLOCK__c / 3.1) <= 187.5 -> next(position) = position - 175) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 187.5 & (tdriveleft.__CLOCK__c / 3.1) <= 212.5 -> next(position) = position - 200) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 212.5 & (tdriveleft.__CLOCK__c / 3.1) <= 237.5 -> next(position) = position - 225) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 237.5 & (tdriveleft.__CLOCK__c / 3.1) <= 262.5 -> next(position) = position - 250) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 262.5 & (tdriveleft.__CLOCK__c / 3.1) <= 287.5 -> next(position) = position - 275) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 287.5 & (tdriveleft.__CLOCK__c / 3.1) <= 312.5 -> next(position) = position - 300) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 312.5 & (tdriveleft.__CLOCK__c / 3.1) <= 337.5 -> next(position) = position - 325) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 337.5 & (tdriveleft.__CLOCK__c / 3.1) <= 362.5 -> next(position) = position - 350) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 362.5 & (tdriveleft.__CLOCK__c / 3.1) <= 387.5 -> next(position) = position - 375) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 387.5 & (tdriveleft.__CLOCK__c / 3.1) <= 412.5 -> next(position) = position - 400) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 412.5 & (tdriveleft.__CLOCK__c / 3.1) <= 437.5 -> next(position) = position - 425) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 437.5 & (tdriveleft.__CLOCK__c / 3.1) <= 462.5 -> next(position) = position - 450) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 462.5 & (tdriveleft.__CLOCK__c / 3.1) <= 487.5 -> next(position) = position - 475) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 487.5 & (tdriveleft.__CLOCK__c / 3.1) <= 512.5 -> next(position) = position - 500) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 3.1 & (tdriveleft.__CLOCK__c / 3.1) > 512.5 -> next(position) = position - 1000) &
+
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) <= 12.5 -> next(position) = 1000) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 12.5 & (tdriveleft.__CLOCK__c / 4.1) <= 37.5 -> next(position) = position - 25) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 37.5 & (tdriveleft.__CLOCK__c / 4.1) <= 62.5 -> next(position) = position - 50) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 62.5 & (tdriveleft.__CLOCK__c / 4.1) <= 87.5 -> next(position) = position - 75) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 87.5 & (tdriveleft.__CLOCK__c / 4.1) <= 112.5 -> next(position) = position - 100) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 112.5 & (tdriveleft.__CLOCK__c / 4.1) <= 137.5 -> next(position) = position - 125) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 137.5 & (tdriveleft.__CLOCK__c / 4.1) <= 162.5 -> next(position) = position - 150) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 162.5 & (tdriveleft.__CLOCK__c / 4.1) <= 187.5 -> next(position) = position - 175) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 187.5 & (tdriveleft.__CLOCK__c / 4.1) <= 212.5 -> next(position) = position - 200) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 212.5 & (tdriveleft.__CLOCK__c / 4.1) <= 237.5 -> next(position) = position - 225) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 237.5 & (tdriveleft.__CLOCK__c / 4.1) <= 262.5 -> next(position) = position - 250) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 262.5 & (tdriveleft.__CLOCK__c / 4.1) <= 287.5 -> next(position) = position - 275) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 287.5 & (tdriveleft.__CLOCK__c / 4.1) <= 312.5 -> next(position) = position - 300) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 312.5 & (tdriveleft.__CLOCK__c / 4.1) <= 337.5 -> next(position) = position - 325) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 337.5 & (tdriveleft.__CLOCK__c / 4.1) <= 362.5 -> next(position) = position - 350) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 362.5 & (tdriveleft.__CLOCK__c / 4.1) <= 387.5 -> next(position) = position - 375) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 387.5 & (tdriveleft.__CLOCK__c / 4.1) <= 412.5 -> next(position) = position - 400) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 412.5 & (tdriveleft.__CLOCK__c / 4.1) <= 437.5 -> next(position) = position - 425) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 437.5 & (tdriveleft.__CLOCK__c / 4.1) <= 462.5 -> next(position) = position - 450) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 462.5 & (tdriveleft.__CLOCK__c / 4.1) <= 487.5 -> next(position) = position - 475) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 487.5 & (tdriveleft.__CLOCK__c / 4.1) <= 512.5 -> next(position) = position - 500) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 4.1 & (tdriveleft.__CLOCK__c / 4.1) > 512.5 -> next(position) = position - 1000) &
+
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) <= 12.5 -> next(position) = 1000) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 12.5 & (tdriveleft.__CLOCK__c / 5.1) <= 37.5 -> next(position) = position - 25) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 37.5 & (tdriveleft.__CLOCK__c / 5.1) <= 62.5 -> next(position) = position - 50) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 62.5 & (tdriveleft.__CLOCK__c / 5.1) <= 87.5 -> next(position) = position - 75) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 87.5 & (tdriveleft.__CLOCK__c / 5.1) <= 112.5 -> next(position) = position - 100) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 112.5 & (tdriveleft.__CLOCK__c / 5.1) <= 137.5 -> next(position) = position - 125) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 137.5 & (tdriveleft.__CLOCK__c / 5.1) <= 162.5 -> next(position) = position - 150) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 162.5 & (tdriveleft.__CLOCK__c / 5.1) <= 187.5 -> next(position) = position - 175) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 187.5 & (tdriveleft.__CLOCK__c / 5.1) <= 212.5 -> next(position) = position - 200) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 212.5 & (tdriveleft.__CLOCK__c / 5.1) <= 237.5 -> next(position) = position - 225) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 237.5 & (tdriveleft.__CLOCK__c / 5.1) <= 262.5 -> next(position) = position - 250) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 262.5 & (tdriveleft.__CLOCK__c / 5.1) <= 287.5 -> next(position) = position - 275) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 287.5 & (tdriveleft.__CLOCK__c / 5.1) <= 312.5 -> next(position) = position - 300) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 312.5 & (tdriveleft.__CLOCK__c / 5.1) <= 337.5 -> next(position) = position - 325) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 337.5 & (tdriveleft.__CLOCK__c / 5.1) <= 362.5 -> next(position) = position - 350) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 362.5 & (tdriveleft.__CLOCK__c / 5.1) <= 387.5 -> next(position) = position - 375) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 387.5 & (tdriveleft.__CLOCK__c / 5.1) <= 412.5 -> next(position) = position - 400) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 412.5 & (tdriveleft.__CLOCK__c / 5.1) <= 437.5 -> next(position) = position - 425) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 437.5 & (tdriveleft.__CLOCK__c / 5.1) <= 462.5 -> next(position) = position - 450) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 462.5 & (tdriveleft.__CLOCK__c / 5.1) <= 487.5 -> next(position) = position - 475) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 487.5 & (tdriveleft.__CLOCK__c / 5.1) <= 512.5 -> next(position) = position - 500) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 5.1 & (tdriveleft.__CLOCK__c / 5.1) > 512.5 -> next(position) = position - 1000) &
+
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) <= 12.5 -> next(position) = 1000) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 12.5 & (tdriveleft.__CLOCK__c / 6.1) <= 37.5 -> next(position) = position - 25) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 37.5 & (tdriveleft.__CLOCK__c / 6.1) <= 62.5 -> next(position) = position - 50) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 62.5 & (tdriveleft.__CLOCK__c / 6.1) <= 87.5 -> next(position) = position - 75) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 87.5 & (tdriveleft.__CLOCK__c / 6.1) <= 112.5 -> next(position) = position - 100) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 112.5 & (tdriveleft.__CLOCK__c / 6.1) <= 137.5 -> next(position) = position - 125) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 137.5 & (tdriveleft.__CLOCK__c / 6.1) <= 162.5 -> next(position) = position - 150) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 162.5 & (tdriveleft.__CLOCK__c / 6.1) <= 187.5 -> next(position) = position - 175) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 187.5 & (tdriveleft.__CLOCK__c / 6.1) <= 212.5 -> next(position) = position - 200) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 212.5 & (tdriveleft.__CLOCK__c / 6.1) <= 237.5 -> next(position) = position - 225) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 237.5 & (tdriveleft.__CLOCK__c / 6.1) <= 262.5 -> next(position) = position - 250) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 262.5 & (tdriveleft.__CLOCK__c / 6.1) <= 287.5 -> next(position) = position - 275) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 287.5 & (tdriveleft.__CLOCK__c / 6.1) <= 312.5 -> next(position) = position - 300) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 312.5 & (tdriveleft.__CLOCK__c / 6.1) <= 337.5 -> next(position) = position - 325) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 337.5 & (tdriveleft.__CLOCK__c / 6.1) <= 362.5 -> next(position) = position - 350) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 362.5 & (tdriveleft.__CLOCK__c / 6.1) <= 387.5 -> next(position) = position - 375) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 387.5 & (tdriveleft.__CLOCK__c / 6.1) <= 412.5 -> next(position) = position - 400) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 412.5 & (tdriveleft.__CLOCK__c / 6.1) <= 437.5 -> next(position) = position - 425) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 437.5 & (tdriveleft.__CLOCK__c / 6.1) <= 462.5 -> next(position) = position - 450) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 462.5 & (tdriveleft.__CLOCK__c / 6.1) <= 487.5 -> next(position) = position - 475) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 487.5 & (tdriveleft.__CLOCK__c / 6.1) <= 512.5 -> next(position) = position - 500) &
+
+(tdriveleft.EVENT = DRIVE_END & weight = 6.1 & (tdriveleft.__CLOCK__c / 6.1) > 512.5 -> next(position) = position - 1000) &
+
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) <= 12.5 -> next(position) = 1000) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 12.5 & (tdriveright.__CLOCK__c / 0.1) <= 37.5 -> next(position) = position + 25) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 37.5 & (tdriveright.__CLOCK__c / 0.1) <= 62.5 -> next(position) = position + 50) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 62.5 & (tdriveright.__CLOCK__c / 0.1) <= 87.5 -> next(position) = position + 75) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 87.5 & (tdriveright.__CLOCK__c / 0.1) <= 112.5 -> next(position) = position + 100) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 112.5 & (tdriveright.__CLOCK__c / 0.1) <= 137.5 -> next(position) = position + 125) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 137.5 & (tdriveright.__CLOCK__c / 0.1) <= 162.5 -> next(position) = position + 150) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 162.5 & (tdriveright.__CLOCK__c / 0.1) <= 187.5 -> next(position) = position + 175) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 187.5 & (tdriveright.__CLOCK__c / 0.1) <= 212.5 -> next(position) = position + 200) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 212.5 & (tdriveright.__CLOCK__c / 0.1) <= 237.5 -> next(position) = position + 225) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 237.5 & (tdriveright.__CLOCK__c / 0.1) <= 262.5 -> next(position) = position + 250) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 262.5 & (tdriveright.__CLOCK__c / 0.1) <= 287.5 -> next(position) = position + 275) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 287.5 & (tdriveright.__CLOCK__c / 0.1) <= 312.5 -> next(position) = position + 300) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 312.5 & (tdriveright.__CLOCK__c / 0.1) <= 337.5 -> next(position) = position + 325) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 337.5 & (tdriveright.__CLOCK__c / 0.1) <= 362.5 -> next(position) = position + 350) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 362.5 & (tdriveright.__CLOCK__c / 0.1) <= 387.5 -> next(position) = position + 375) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 387.5 & (tdriveright.__CLOCK__c / 0.1) <= 412.5 -> next(position) = position + 400) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 412.5 & (tdriveright.__CLOCK__c / 0.1) <= 437.5 -> next(position) = position + 425) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 437.5 & (tdriveright.__CLOCK__c / 0.1) <= 462.5 -> next(position) = position + 450) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 462.5 & (tdriveright.__CLOCK__c / 0.1) <= 487.5 -> next(position) = position + 475) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 487.5 & (tdriveright.__CLOCK__c / 0.1) <= 512.5 -> next(position) = position + 500) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 0.1 & (tdriveright.__CLOCK__c / 0.1) > 512.5 -> next(position) = position + 1000) &
+
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) <= 12.5 -> next(position) = 1000) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 12.5 & (tdriveright.__CLOCK__c / 1.1) <= 37.5 -> next(position) = position + 25) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 37.5 & (tdriveright.__CLOCK__c / 1.1) <= 62.5 -> next(position) = position + 50) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 62.5 & (tdriveright.__CLOCK__c / 1.1) <= 87.5 -> next(position) = position + 75) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 87.5 & (tdriveright.__CLOCK__c / 1.1) <= 112.5 -> next(position) = position + 100) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 112.5 & (tdriveright.__CLOCK__c / 1.1) <= 137.5 -> next(position) = position + 125) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 137.5 & (tdriveright.__CLOCK__c / 1.1) <= 162.5 -> next(position) = position + 150) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 162.5 & (tdriveright.__CLOCK__c / 1.1) <= 187.5 -> next(position) = position + 175) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 187.5 & (tdriveright.__CLOCK__c / 1.1) <= 212.5 -> next(position) = position + 200) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 212.5 & (tdriveright.__CLOCK__c / 1.1) <= 237.5 -> next(position) = position + 225) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 237.5 & (tdriveright.__CLOCK__c / 1.1) <= 262.5 -> next(position) = position + 250) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 262.5 & (tdriveright.__CLOCK__c / 1.1) <= 287.5 -> next(position) = position + 275) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 287.5 & (tdriveright.__CLOCK__c / 1.1) <= 312.5 -> next(position) = position + 300) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 312.5 & (tdriveright.__CLOCK__c / 1.1) <= 337.5 -> next(position) = position + 325) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 337.5 & (tdriveright.__CLOCK__c / 1.1) <= 362.5 -> next(position) = position + 350) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 362.5 & (tdriveright.__CLOCK__c / 1.1) <= 387.5 -> next(position) = position + 375) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 387.5 & (tdriveright.__CLOCK__c / 1.1) <= 412.5 -> next(position) = position + 400) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 412.5 & (tdriveright.__CLOCK__c / 1.1) <= 437.5 -> next(position) = position + 425) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 437.5 & (tdriveright.__CLOCK__c / 1.1) <= 462.5 -> next(position) = position + 450) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 462.5 & (tdriveright.__CLOCK__c / 1.1) <= 487.5 -> next(position) = position + 475) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 487.5 & (tdriveright.__CLOCK__c / 1.1) <= 512.5 -> next(position) = position + 500) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 1.1 & (tdriveright.__CLOCK__c / 1.1) > 512.5 -> next(position) = position + 1000) &
+
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) <= 12.5 -> next(position) = 1000) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 12.5 & (tdriveright.__CLOCK__c / 2.1) <= 37.5 -> next(position) = position + 25) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 37.5 & (tdriveright.__CLOCK__c / 2.1) <= 62.5 -> next(position) = position + 50) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 62.5 & (tdriveright.__CLOCK__c / 2.1) <= 87.5 -> next(position) = position + 75) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 87.5 & (tdriveright.__CLOCK__c / 2.1) <= 112.5 -> next(position) = position + 100) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 112.5 & (tdriveright.__CLOCK__c / 2.1) <= 137.5 -> next(position) = position + 125) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 137.5 & (tdriveright.__CLOCK__c / 2.1) <= 162.5 -> next(position) = position + 150) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 162.5 & (tdriveright.__CLOCK__c / 2.1) <= 187.5 -> next(position) = position + 175) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 187.5 & (tdriveright.__CLOCK__c / 2.1) <= 212.5 -> next(position) = position + 200) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 212.5 & (tdriveright.__CLOCK__c / 2.1) <= 237.5 -> next(position) = position + 225) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 237.5 & (tdriveright.__CLOCK__c / 2.1) <= 262.5 -> next(position) = position + 250) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 262.5 & (tdriveright.__CLOCK__c / 2.1) <= 287.5 -> next(position) = position + 275) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 287.5 & (tdriveright.__CLOCK__c / 2.1) <= 312.5 -> next(position) = position + 300) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 312.5 & (tdriveright.__CLOCK__c / 2.1) <= 337.5 -> next(position) = position + 325) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 337.5 & (tdriveright.__CLOCK__c / 2.1) <= 362.5 -> next(position) = position + 350) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 362.5 & (tdriveright.__CLOCK__c / 2.1) <= 387.5 -> next(position) = position + 375) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 387.5 & (tdriveright.__CLOCK__c / 2.1) <= 412.5 -> next(position) = position + 400) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 412.5 & (tdriveright.__CLOCK__c / 2.1) <= 437.5 -> next(position) = position + 425) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 437.5 & (tdriveright.__CLOCK__c / 2.1) <= 462.5 -> next(position) = position + 450) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 462.5 & (tdriveright.__CLOCK__c / 2.1) <= 487.5 -> next(position) = position + 475) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 487.5 & (tdriveright.__CLOCK__c / 2.1) <= 512.5 -> next(position) = position + 500) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 2.1 & (tdriveright.__CLOCK__c / 2.1) > 512.5 -> next(position) = position + 1000) &
+
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) <= 12.5 -> next(position) = 1000) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 12.5 & (tdriveright.__CLOCK__c / 3.1) <= 37.5 -> next(position) = position + 25) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 37.5 & (tdriveright.__CLOCK__c / 3.1) <= 62.5 -> next(position) = position + 50) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 62.5 & (tdriveright.__CLOCK__c / 3.1) <= 87.5 -> next(position) = position + 75) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 87.5 & (tdriveright.__CLOCK__c / 3.1) <= 112.5 -> next(position) = position + 100) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 112.5 & (tdriveright.__CLOCK__c / 3.1) <= 137.5 -> next(position) = position + 125) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 137.5 & (tdriveright.__CLOCK__c / 3.1) <= 162.5 -> next(position) = position + 150) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 162.5 & (tdriveright.__CLOCK__c / 3.1) <= 187.5 -> next(position) = position + 175) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 187.5 & (tdriveright.__CLOCK__c / 3.1) <= 212.5 -> next(position) = position + 200) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 212.5 & (tdriveright.__CLOCK__c / 3.1) <= 237.5 -> next(position) = position + 225) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 237.5 & (tdriveright.__CLOCK__c / 3.1) <= 262.5 -> next(position) = position + 250) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 262.5 & (tdriveright.__CLOCK__c / 3.1) <= 287.5 -> next(position) = position + 275) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 287.5 & (tdriveright.__CLOCK__c / 3.1) <= 312.5 -> next(position) = position + 300) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 312.5 & (tdriveright.__CLOCK__c / 3.1) <= 337.5 -> next(position) = position + 325) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 337.5 & (tdriveright.__CLOCK__c / 3.1) <= 362.5 -> next(position) = position + 350) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 362.5 & (tdriveright.__CLOCK__c / 3.1) <= 387.5 -> next(position) = position + 375) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 387.5 & (tdriveright.__CLOCK__c / 3.1) <= 412.5 -> next(position) = position + 400) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 412.5 & (tdriveright.__CLOCK__c / 3.1) <= 437.5 -> next(position) = position + 425) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 437.5 & (tdriveright.__CLOCK__c / 3.1) <= 462.5 -> next(position) = position + 450) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 462.5 & (tdriveright.__CLOCK__c / 3.1) <= 487.5 -> next(position) = position + 475) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 487.5 & (tdriveright.__CLOCK__c / 3.1) <= 512.5 -> next(position) = position + 500) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 3.1 & (tdriveright.__CLOCK__c / 3.1) > 512.5 -> next(position) = position + 1000) &
+
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) <= 12.5 -> next(position) = 1000) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 12.5 & (tdriveright.__CLOCK__c / 4.1) <= 37.5 -> next(position) = position + 25) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 37.5 & (tdriveright.__CLOCK__c / 4.1) <= 62.5 -> next(position) = position + 50) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 62.5 & (tdriveright.__CLOCK__c / 4.1) <= 87.5 -> next(position) = position + 75) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 87.5 & (tdriveright.__CLOCK__c / 4.1) <= 112.5 -> next(position) = position + 100) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 112.5 & (tdriveright.__CLOCK__c / 4.1) <= 137.5 -> next(position) = position + 125) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 137.5 & (tdriveright.__CLOCK__c / 4.1) <= 162.5 -> next(position) = position + 150) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 162.5 & (tdriveright.__CLOCK__c / 4.1) <= 187.5 -> next(position) = position + 175) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 187.5 & (tdriveright.__CLOCK__c / 4.1) <= 212.5 -> next(position) = position + 200) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 212.5 & (tdriveright.__CLOCK__c / 4.1) <= 237.5 -> next(position) = position + 225) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 237.5 & (tdriveright.__CLOCK__c / 4.1) <= 262.5 -> next(position) = position + 250) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 262.5 & (tdriveright.__CLOCK__c / 4.1) <= 287.5 -> next(position) = position + 275) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 287.5 & (tdriveright.__CLOCK__c / 4.1) <= 312.5 -> next(position) = position + 300) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 312.5 & (tdriveright.__CLOCK__c / 4.1) <= 337.5 -> next(position) = position + 325) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 337.5 & (tdriveright.__CLOCK__c / 4.1) <= 362.5 -> next(position) = position + 350) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 362.5 & (tdriveright.__CLOCK__c / 4.1) <= 387.5 -> next(position) = position + 375) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 387.5 & (tdriveright.__CLOCK__c / 4.1) <= 412.5 -> next(position) = position + 400) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 412.5 & (tdriveright.__CLOCK__c / 4.1) <= 437.5 -> next(position) = position + 425) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 437.5 & (tdriveright.__CLOCK__c / 4.1) <= 462.5 -> next(position) = position + 450) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 462.5 & (tdriveright.__CLOCK__c / 4.1) <= 487.5 -> next(position) = position + 475) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 487.5 & (tdriveright.__CLOCK__c / 4.1) <= 512.5 -> next(position) = position + 500) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 4.1 & (tdriveright.__CLOCK__c / 4.1) > 512.5 -> next(position) = position + 1000) &
+
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) <= 12.5 -> next(position) = 1000) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 12.5 & (tdriveright.__CLOCK__c / 5.1) <= 37.5 -> next(position) = position + 25) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 37.5 & (tdriveright.__CLOCK__c / 5.1) <= 62.5 -> next(position) = position + 50) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 62.5 & (tdriveright.__CLOCK__c / 5.1) <= 87.5 -> next(position) = position + 75) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 87.5 & (tdriveright.__CLOCK__c / 5.1) <= 112.5 -> next(position) = position + 100) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 112.5 & (tdriveright.__CLOCK__c / 5.1) <= 137.5 -> next(position) = position + 125) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 137.5 & (tdriveright.__CLOCK__c / 5.1) <= 162.5 -> next(position) = position + 150) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 162.5 & (tdriveright.__CLOCK__c / 5.1) <= 187.5 -> next(position) = position + 175) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 187.5 & (tdriveright.__CLOCK__c / 5.1) <= 212.5 -> next(position) = position + 200) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 212.5 & (tdriveright.__CLOCK__c / 5.1) <= 237.5 -> next(position) = position + 225) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 237.5 & (tdriveright.__CLOCK__c / 5.1) <= 262.5 -> next(position) = position + 250) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 262.5 & (tdriveright.__CLOCK__c / 5.1) <= 287.5 -> next(position) = position + 275) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 287.5 & (tdriveright.__CLOCK__c / 5.1) <= 312.5 -> next(position) = position + 300) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 312.5 & (tdriveright.__CLOCK__c / 5.1) <= 337.5 -> next(position) = position + 325) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 337.5 & (tdriveright.__CLOCK__c / 5.1) <= 362.5 -> next(position) = position + 350) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 362.5 & (tdriveright.__CLOCK__c / 5.1) <= 387.5 -> next(position) = position + 375) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 387.5 & (tdriveright.__CLOCK__c / 5.1) <= 412.5 -> next(position) = position + 400) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 412.5 & (tdriveright.__CLOCK__c / 5.1) <= 437.5 -> next(position) = position + 425) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 437.5 & (tdriveright.__CLOCK__c / 5.1) <= 462.5 -> next(position) = position + 450) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 462.5 & (tdriveright.__CLOCK__c / 5.1) <= 487.5 -> next(position) = position + 475) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 487.5 & (tdriveright.__CLOCK__c / 5.1) <= 512.5 -> next(position) = position + 500) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 5.1 & (tdriveright.__CLOCK__c / 5.1) > 512.5 -> next(position) = position + 1000) &
+
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) <= 12.5 -> next(position) = 1000) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 12.5 & (tdriveright.__CLOCK__c / 6.1) <= 37.5 -> next(position) = position + 25) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 37.5 & (tdriveright.__CLOCK__c / 6.1) <= 62.5 -> next(position) = position + 50) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 62.5 & (tdriveright.__CLOCK__c / 6.1) <= 87.5 -> next(position) = position + 75) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 87.5 & (tdriveright.__CLOCK__c / 6.1) <= 112.5 -> next(position) = position + 100) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 112.5 & (tdriveright.__CLOCK__c / 6.1) <= 137.5 -> next(position) = position + 125) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 137.5 & (tdriveright.__CLOCK__c / 6.1) <= 162.5 -> next(position) = position + 150) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 162.5 & (tdriveright.__CLOCK__c / 6.1) <= 187.5 -> next(position) = position + 175) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 187.5 & (tdriveright.__CLOCK__c / 6.1) <= 212.5 -> next(position) = position + 200) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 212.5 & (tdriveright.__CLOCK__c / 6.1) <= 237.5 -> next(position) = position + 225) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 237.5 & (tdriveright.__CLOCK__c / 6.1) <= 262.5 -> next(position) = position + 250) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 262.5 & (tdriveright.__CLOCK__c / 6.1) <= 287.5 -> next(position) = position + 275) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 287.5 & (tdriveright.__CLOCK__c / 6.1) <= 312.5 -> next(position) = position + 300) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 312.5 & (tdriveright.__CLOCK__c / 6.1) <= 337.5 -> next(position) = position + 325) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 337.5 & (tdriveright.__CLOCK__c / 6.1) <= 362.5 -> next(position) = position + 350) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 362.5 & (tdriveright.__CLOCK__c / 6.1) <= 387.5 -> next(position) = position + 375) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 387.5 & (tdriveright.__CLOCK__c / 6.1) <= 412.5 -> next(position) = position + 400) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 412.5 & (tdriveright.__CLOCK__c / 6.1) <= 437.5 -> next(position) = position + 425) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 437.5 & (tdriveright.__CLOCK__c / 6.1) <= 462.5 -> next(position) = position + 450) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 462.5 & (tdriveright.__CLOCK__c / 6.1) <= 487.5 -> next(position) = position + 475) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 487.5 & (tdriveright.__CLOCK__c / 6.1) <= 512.5 -> next(position) = position + 500) &
+
+(tdriveright.EVENT = DRIVE_END & weight = 6.1 & (tdriveright.__CLOCK__c / 6.1) > 512.5 -> next(position) = position + 1000) &
+
+
+(tload.EVENT = LOAD_END -> next(weight) = weight + 1) &
+
+(tunload.EVENT = UNLOAD_END -> next(weight) = weight - 1) &
+
+(position != next(position) -> tdriveleft.EVENT = DRIVE_END | tdriveright.EVENT = DRIVE_END) &
+
+(weight != next(weight) -> tload.EVENT = LOAD_END | tunload.EVENT = UNLOAD_END);
+
+INVARSPEC
+
+! (tunload.location = UNLOADING & (!((position = 0) | (position = 100) | (position = 200) | (position = 300) | (position = 400) | (position = 500))));
+

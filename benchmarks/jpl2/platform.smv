@@ -1,0 +1,212 @@
+@TIME_DOMAIN continuous
+
+MODULE T_CHARGE
+
+VAR location : {OFF, ON};
+    __CLOCK__c : clock;
+    start : boolean;
+    end : boolean;
+
+IVAR EVENT : {CHARGE_START, CHARGE_END, STUTTER};
+
+INIT (location = OFF) &
+     (__CLOCK__c = 0);
+
+TRANS
+
+(EVENT = STUTTER -> location = next(location) & next(__CLOCK__c) = __CLOCK__c) &
+
+(EVENT = CHARGE_START -> location = OFF & next(location) = ON & next(__CLOCK__c) = 0) &
+
+(EVENT = CHARGE_END -> location = ON & next(location) = OFF & next(__CLOCK__c) = __CLOCK__c) &
+
+(start <-> EVENT = CHARGE_START) &
+
+(end <-> EVENT = CHARGE_END);
+
+
+MODULE T_DSN
+
+VAR location : {OFF, ON};
+    __CLOCK__c : clock;
+    start : boolean;
+    end : boolean;
+
+IVAR EVENT : {DSN_START, DSN_END, STUTTER};
+
+INIT (location = OFF) &
+     (__CLOCK__c = 0);
+
+TRANS
+
+(EVENT = STUTTER -> location = next(location) & next(__CLOCK__c) = __CLOCK__c) &
+
+(EVENT = DSN_START -> location = OFF & next(location) = ON & next(__CLOCK__c) = 0) &
+
+(EVENT = DSN_END -> location = ON & next(location) = OFF & next(__CLOCK__c) = __CLOCK__c) &
+
+(start <-> EVENT = DSN_START) &
+
+(end <-> EVENT = DSN_END);
+
+
+MODULE T_SBO
+
+VAR location : {OFF, ON};
+    __CLOCK__c : clock;
+    start : boolean;
+    end : boolean;
+
+IVAR EVENT : {SBO_START, SBO_END, STUTTER};
+
+INIT (location = OFF) &
+     (__CLOCK__c = 0);
+
+TRANS
+
+(EVENT = STUTTER -> location = next(location) & next(__CLOCK__c) = __CLOCK__c) &
+
+(EVENT = SBO_START -> location = OFF & next(location) = ON & next(__CLOCK__c) = 0) &
+
+(EVENT = SBO_END -> location = ON & next(location) = OFF & next(__CLOCK__c) = __CLOCK__c) &
+
+(start <-> EVENT = SBO_START) &
+
+(end <-> EVENT = SBO_END);
+
+
+MODULE T_TCM
+
+VAR location : {OFF, ON};
+    __CLOCK__c : clock;
+    start : boolean;
+    end : boolean;
+
+IVAR EVENT : {TCM_START, TCM_END, STUTTER};
+
+INIT (location = OFF) &
+     (__CLOCK__c = 0);
+
+TRANS
+
+(EVENT = STUTTER -> location = next(location) & next(__CLOCK__c) = __CLOCK__c) &
+
+(EVENT = TCM_START -> location = OFF & next(location) = ON & next(__CLOCK__c) = 0) &
+
+(EVENT = TCM_END -> location = ON & next(location) = OFF & next(__CLOCK__c) = __CLOCK__c) &
+
+(start <-> EVENT = TCM_START) &
+
+(end <-> EVENT = TCM_END);
+
+
+MODULE main
+
+VAR
+
+global_clock : clock;
+
+tCHARGE : T_CHARGE();
+
+tDSN : T_DSN();
+
+tSBO : T_SBO();
+
+tTCM : T_TCM();
+
+soc : real;
+
+BOOL_CHARGE_running : boolean;
+
+BOOL_DSN_running : boolean;
+
+BOOL_SBO_running : boolean;
+
+BOOL_TCM_running : boolean;
+
+INIT
+
+(global_clock = 0) &
+
+(soc = 200) &
+
+(!BOOL_CHARGE_running) & (!BOOL_DSN_running) & (!BOOL_SBO_running) & (!BOOL_TCM_running);
+
+TRANS
+
+(global_clock = next(global_clock)) &
+
+((tCHARGE.EVENT = CHARGE_START) -> next(BOOL_CHARGE_running)) &
+
+((tCHARGE.EVENT = CHARGE_END) -> !next(BOOL_CHARGE_running)) &
+
+((tDSN.EVENT = DSN_START) -> next(BOOL_DSN_running)) &
+
+((tDSN.EVENT = DSN_END) -> !next(BOOL_DSN_running)) &
+
+((tSBO.EVENT = SBO_START) -> next(BOOL_SBO_running)) &
+
+((tSBO.EVENT = SBO_END) -> !next(BOOL_SBO_running)) &
+
+((tTCM.EVENT = TCM_START) -> next(BOOL_TCM_running)) &
+
+((tTCM.EVENT = TCM_END) -> !next(BOOL_TCM_running)) &
+
+((tCHARGE.EVENT = CHARGE_END & tCHARGE.__CLOCK__c <= 90) -> (next(soc) = soc + 4 * tCHARGE.__CLOCK__c)) &
+
+((tCHARGE.EVENT = CHARGE_END & tCHARGE.__CLOCK__c > 90 & tCHARGE.__CLOCK__c <= 110) -> (next(soc) = soc + 445)) &
+
+((tCHARGE.EVENT = CHARGE_END & tCHARGE.__CLOCK__c > 110 & tCHARGE.__CLOCK__c <= 130) -> (next(soc) = soc + 535)) &
+
+((tCHARGE.EVENT = CHARGE_END & tCHARGE.__CLOCK__c > 130 & tCHARGE.__CLOCK__c <= 150) -> (next(soc) = soc + 625)) &
+
+((tCHARGE.EVENT = CHARGE_END & tCHARGE.__CLOCK__c > 150 & tCHARGE.__CLOCK__c <= 170) -> (next(soc) = soc + 715)) &
+
+((tCHARGE.EVENT = CHARGE_END & tCHARGE.__CLOCK__c > 170 & tCHARGE.__CLOCK__c <= 190) -> (next(soc) = soc + 805)) &
+
+((tCHARGE.EVENT = CHARGE_END & tCHARGE.__CLOCK__c > 190 & tCHARGE.__CLOCK__c <= 210) -> (next(soc) = soc + 895)) &
+
+((tCHARGE.EVENT = CHARGE_END & tCHARGE.__CLOCK__c > 210 & tCHARGE.__CLOCK__c <= 230) -> (next(soc) = soc + 985)) &
+
+((tCHARGE.EVENT = CHARGE_END & tCHARGE.__CLOCK__c > 230) -> (next(soc) = soc + 5 * tCHARGE.__CLOCK__c)) &
+
+((tDSN.EVENT = DSN_END & tDSN.__CLOCK__c <= 45) -> (next(soc) = soc - 2 * tDSN.__CLOCK__c)) &
+
+((tDSN.EVENT = DSN_END & tDSN.__CLOCK__c > 45 & tDSN.__CLOCK__c <= 48) -> (next(soc) = soc - 97)) &
+
+((tDSN.EVENT = DSN_END & tDSN.__CLOCK__c > 48 & tDSN.__CLOCK__c <= 51) -> (next(soc) = soc - 104)) &
+
+((tDSN.EVENT = DSN_END & tDSN.__CLOCK__c > 51 & tDSN.__CLOCK__c <= 54) -> (next(soc) = soc - 110)) &
+
+((tDSN.EVENT = DSN_END & tDSN.__CLOCK__c > 54 & tDSN.__CLOCK__c <= 57) -> (next(soc) = soc - 116)) &
+
+((tDSN.EVENT = DSN_END & tDSN.__CLOCK__c > 57 & tDSN.__CLOCK__c <= 60) -> (next(soc) = soc - 123)) &
+
+((tDSN.EVENT = DSN_END & tDSN.__CLOCK__c > 60 & tDSN.__CLOCK__c <= 63) -> (next(soc) = soc - 129)) &
+
+((tDSN.EVENT = DSN_END & tDSN.__CLOCK__c > 63 & tDSN.__CLOCK__c <= 66) -> (next(soc) = soc - 135)) &
+
+((tDSN.EVENT = DSN_END & tDSN.__CLOCK__c > 66 & tDSN.__CLOCK__c <= 69) -> (next(soc) = soc - 142)) &
+
+((tDSN.EVENT = DSN_END & tDSN.__CLOCK__c > 69 & tDSN.__CLOCK__c <= 72) -> (next(soc) = soc - 148)) &
+
+((tDSN.EVENT = DSN_END & tDSN.__CLOCK__c > 72) -> (next(soc) = soc - 2.2 * tDSN.__CLOCK__c)) &
+
+((tSBO.EVENT = SBO_END & tSBO.__CLOCK__c <= 130) -> (next(soc) = soc - 0.1 * tSBO.__CLOCK__c)) &
+
+((tSBO.EVENT = SBO_END & tSBO.__CLOCK__c > 130 & tSBO.__CLOCK__c <= 170) -> (next(soc) = soc - 23)) &
+
+((tSBO.EVENT = SBO_END & tSBO.__CLOCK__c > 170 & tSBO.__CLOCK__c <= 210) -> (next(soc) = soc - 28)) &
+
+((tSBO.EVENT = SBO_END & tSBO.__CLOCK__c > 210) -> (next(soc) = soc - 0.2 * tSBO.__CLOCK__c)) &
+
+((tTCM.EVENT = TCM_END) -> (next(soc) = soc - tTCM.__CLOCK__c)) &
+
+(soc != next(soc) -> ((tCHARGE.EVENT = CHARGE_END) | (tDSN.EVENT = DSN_END) | (tSBO.EVENT = SBO_END) | (tTCM.EVENT = TCM_END)));
+
+INVARSPEC
+
+soc >= 40;
+
+
+

@@ -1,0 +1,27 @@
+type Item;
+
+constant rational id(Item item);
+
+fluent boolean holding(Item item);
+fluent boolean fixed(Item item);
+
+action switch(Item prev_item, Item next_item) {
+    duration := 1;
+
+    [start] holding(prev_item);
+    [start] id(next_item) == id(prev_item) + 1;
+    [start] holding(prev_item) := false;
+
+    [end] holding(next_item) := true;
+};
+
+action fix(Item item) {
+    duration := 5;
+
+    [start] item != empty1;
+    [start] item != empty2;
+
+    [all] holding(item);
+
+    [end] fixed(item) := true;
+};

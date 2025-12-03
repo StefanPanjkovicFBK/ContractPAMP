@@ -1,0 +1,64 @@
+type Position;
+type Body;
+
+constant Position p(Body s);
+constant float distance(Position p1, Position p2);
+constant rational id(Position p);
+
+fluent integer newImages;
+fluent integer transmittedImages;
+fluent integer image_taken(Body s);
+fluent Position pos;
+fluent boolean visited(Position p);
+fluent boolean charging;
+fluent boolean transmitting;
+fluent boolean observing;
+fluent boolean moving;
+
+action CHARGE() {
+    duration >= 100 and duration <= 200;
+
+    [start] (not charging) and (not transmitting) and (not observing) and (not moving);
+    [start] charging := true;
+
+    [end] charging := false;
+};
+
+action DSN() {
+    duration >= 50 and duration <= 54;
+
+    [start] (not charging) and (not transmitting) and (not observing) and (not moving);
+    [start] newImages > 0; 
+    [start] transmitting := true;
+
+    [end] transmittedImages := transmittedImages + newImages;
+    [end] newImages := 0;
+    [end] transmitting := false;
+};
+
+action SBO(Body s) {
+    duration >= 150 and duration <= 200;
+
+    [start] (not charging) and (not transmitting) and (not observing) and (not moving);
+    [start] pos == p(s);
+    [start] observing := true;
+
+    [end] image_taken(s) := image_taken(s) + 1;
+    [end] newImages := newImages + 1;
+    [end] observing := false;
+};
+
+action TCM(Position from, Position to) {
+    duration := distance(from, to);
+
+    [start] (not charging) and (not transmitting) and (not observing) and (not moving);
+    [start] pos == from;
+    [start] from != to;
+    [start] not visited(to);
+    [start] id(to) == id(from) + 1;
+    [start] moving := true;
+
+    [end] pos := to;
+    [end] visited(to) := true;
+    [end] moving := false;
+};
