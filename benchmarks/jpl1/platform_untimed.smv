@@ -31,6 +31,10 @@ tTCM.location : {OFF, ON};
 tTCM.start : boolean;
 tTCM.end : boolean;
 soc : real;
+CHARGE_running_ : boolean;
+DSN_running_ : boolean;
+SBO_running_ : boolean;
+TCM_running_ : boolean;
 time : real;
 __iota : boolean;
 
@@ -82,6 +86,18 @@ INIT
  soc = 200
 
 INIT
+ !CHARGE_running_
+
+INIT
+ !DSN_running_
+
+INIT
+ !SBO_running_
+
+INIT
+ !TCM_running_
+
+INIT
  time = 0
 
 INIT
@@ -90,10 +106,10 @@ INIT
 
 
 TRANS
- (!__expr0 | (__delta > 0 & ((((((((((((((((((next(global_clock) = global_clock + __delta & next(tCHARGE.__CLOCK__c) = tCHARGE.__CLOCK__c + __delta) & next(tDSN.__CLOCK__c) = tDSN.__CLOCK__c + __delta) & next(tSBO.__CLOCK__c) = tSBO.__CLOCK__c + __delta) & next(tTCM.__CLOCK__c) = tTCM.__CLOCK__c + __delta) & next(tCHARGE.location) = tCHARGE.location) & next(tCHARGE.start) = tCHARGE.start) & next(tCHARGE.end) = tCHARGE.end) & next(tDSN.location) = tDSN.location) & next(tDSN.start) = tDSN.start) & next(tDSN.end) = tDSN.end) & next(tSBO.location) = tSBO.location) & next(tSBO.start) = tSBO.start) & next(tSBO.end) = tSBO.end) & next(tTCM.location) = tTCM.location) & next(tTCM.start) = tTCM.start) & next(tTCM.end) = tTCM.end) & next(soc) = soc) & next(time) = time + __delta)))
+ (!__expr0 | (__delta > 0 & ((((((((((((((((((((((next(global_clock) = global_clock + __delta & next(tCHARGE.__CLOCK__c) = tCHARGE.__CLOCK__c + __delta) & next(tDSN.__CLOCK__c) = tDSN.__CLOCK__c + __delta) & next(tSBO.__CLOCK__c) = tSBO.__CLOCK__c + __delta) & next(tTCM.__CLOCK__c) = tTCM.__CLOCK__c + __delta) & next(tCHARGE.location) = tCHARGE.location) & next(tCHARGE.start) = tCHARGE.start) & next(tCHARGE.end) = tCHARGE.end) & next(tDSN.location) = tDSN.location) & next(tDSN.start) = tDSN.start) & next(tDSN.end) = tDSN.end) & next(tSBO.location) = tSBO.location) & next(tSBO.start) = tSBO.start) & next(tSBO.end) = tSBO.end) & next(tTCM.location) = tTCM.location) & next(tTCM.start) = tTCM.start) & next(tTCM.end) = tTCM.end) & next(soc) = soc) & next(CHARGE_running_) = CHARGE_running_) & next(DSN_running_) = DSN_running_) & next(SBO_running_) = SBO_running_) & next(TCM_running_) = TCM_running_) & next(time) = time + __delta)))
 
 TRANS
- (__expr0 | (((((((((((tCHARGE.EVENT = STUTTER -> (tCHARGE.location = next(tCHARGE.location) & __expr1)) & (tCHARGE.EVENT = CHARGE_START -> ((tCHARGE.location = OFF & next(tCHARGE.location) = ON) & next(tCHARGE.__CLOCK__c) = 0))) & (__expr2 -> ((tCHARGE.location = ON & next(tCHARGE.location) = OFF) & __expr1))) & (tCHARGE.start <-> tCHARGE.EVENT = CHARGE_START)) & (tCHARGE.end <-> __expr2)) & (((((tDSN.EVENT = STUTTER -> (tDSN.location = next(tDSN.location) & __expr3)) & (tDSN.EVENT = DSN_START -> ((tDSN.location = OFF & next(tDSN.location) = ON) & next(tDSN.__CLOCK__c) = 0))) & (__expr4 -> ((tDSN.location = ON & next(tDSN.location) = OFF) & __expr3))) & (tDSN.start <-> tDSN.EVENT = DSN_START)) & (tDSN.end <-> __expr4))) & (((((tSBO.EVENT = STUTTER -> (tSBO.location = next(tSBO.location) & __expr5)) & (tSBO.EVENT = SBO_START -> ((tSBO.location = OFF & next(tSBO.location) = ON) & next(tSBO.__CLOCK__c) = 0))) & (__expr6 -> ((tSBO.location = ON & next(tSBO.location) = OFF) & __expr5))) & (tSBO.start <-> tSBO.EVENT = SBO_START)) & (tSBO.end <-> __expr6))) & (((((tTCM.EVENT = STUTTER -> (tTCM.location = next(tTCM.location) & __expr7)) & (tTCM.EVENT = TCM_START -> ((tTCM.location = OFF & next(tTCM.location) = ON) & next(tTCM.__CLOCK__c) = 0))) & (__expr8 -> ((tTCM.location = ON & next(tTCM.location) = OFF) & __expr7))) & (tTCM.start <-> tTCM.EVENT = TCM_START)) & (tTCM.end <-> __expr8))) & ((((((((((((((((((((((((((global_clock = next(global_clock) & ((__expr2 & tCHARGE.__CLOCK__c <= 90) -> next(soc) = soc + 4 * tCHARGE.__CLOCK__c)) & (((__expr2 & tCHARGE.__CLOCK__c > 90) & tCHARGE.__CLOCK__c <= 110) -> next(soc) = soc + 445)) & (((__expr2 & tCHARGE.__CLOCK__c > 110) & tCHARGE.__CLOCK__c <= 130) -> next(soc) = soc + 535)) & (((__expr2 & tCHARGE.__CLOCK__c > 130) & tCHARGE.__CLOCK__c <= 150) -> next(soc) = soc + 625)) & (((__expr2 & tCHARGE.__CLOCK__c > 150) & tCHARGE.__CLOCK__c <= 170) -> next(soc) = soc + 715)) & (((__expr2 & tCHARGE.__CLOCK__c > 170) & tCHARGE.__CLOCK__c <= 190) -> next(soc) = soc + 805)) & (((__expr2 & tCHARGE.__CLOCK__c > 190) & tCHARGE.__CLOCK__c <= 210) -> next(soc) = soc + 895)) & (((__expr2 & tCHARGE.__CLOCK__c > 210) & tCHARGE.__CLOCK__c <= 230) -> next(soc) = soc + 985)) & ((__expr2 & tCHARGE.__CLOCK__c > 230) -> next(soc) = soc + 5 * tCHARGE.__CLOCK__c)) & ((__expr4 & tDSN.__CLOCK__c <= 45) -> next(soc) = soc - 2 * tDSN.__CLOCK__c)) & (((__expr4 & tDSN.__CLOCK__c > 45) & tDSN.__CLOCK__c <= 48) -> next(soc) = soc - 97)) & (((__expr4 & tDSN.__CLOCK__c > 48) & tDSN.__CLOCK__c <= 51) -> next(soc) = soc - 104)) & (((__expr4 & tDSN.__CLOCK__c > 51) & tDSN.__CLOCK__c <= 54) -> next(soc) = soc - 110)) & (((__expr4 & tDSN.__CLOCK__c > 54) & tDSN.__CLOCK__c <= 57) -> next(soc) = soc - 116)) & (((__expr4 & tDSN.__CLOCK__c > 57) & tDSN.__CLOCK__c <= 60) -> next(soc) = soc - 123)) & (((__expr4 & tDSN.__CLOCK__c > 60) & tDSN.__CLOCK__c <= 63) -> next(soc) = soc - 129)) & (((__expr4 & tDSN.__CLOCK__c > 63) & tDSN.__CLOCK__c <= 66) -> next(soc) = soc - 135)) & (((__expr4 & tDSN.__CLOCK__c > 66) & tDSN.__CLOCK__c <= 69) -> next(soc) = soc - 142)) & (((__expr4 & tDSN.__CLOCK__c > 69) & tDSN.__CLOCK__c <= 72) -> next(soc) = soc - 148)) & ((__expr4 & tDSN.__CLOCK__c > 72) -> next(soc) = soc - 2.2 * tDSN.__CLOCK__c)) & ((__expr6 & tSBO.__CLOCK__c <= 130) -> next(soc) = soc - 0.1 * tSBO.__CLOCK__c)) & (((__expr6 & tSBO.__CLOCK__c > 130) & tSBO.__CLOCK__c <= 170) -> next(soc) = soc - 23)) & (((__expr6 & tSBO.__CLOCK__c > 170) & tSBO.__CLOCK__c <= 210) -> next(soc) = soc - 28)) & ((__expr6 & tSBO.__CLOCK__c > 210) -> next(soc) = soc - 0.2 * tSBO.__CLOCK__c)) & (__expr8 -> next(soc) = soc - tTCM.__CLOCK__c)) & (soc != next(soc) -> (((__expr2 | __expr4) | __expr6) | __expr8)))) & __delta = 0) & (__iota & next(__iota))))
+ (__expr0 | (((((((((((tCHARGE.EVENT = STUTTER -> (tCHARGE.location = next(tCHARGE.location) & __expr1)) & (__expr2 -> ((tCHARGE.location = OFF & next(tCHARGE.location) = ON) & next(tCHARGE.__CLOCK__c) = 0))) & (__expr3 -> ((tCHARGE.location = ON & next(tCHARGE.location) = OFF) & __expr1))) & (tCHARGE.start <-> __expr2)) & (tCHARGE.end <-> __expr3)) & (((((tDSN.EVENT = STUTTER -> (tDSN.location = next(tDSN.location) & __expr4)) & (__expr5 -> ((tDSN.location = OFF & next(tDSN.location) = ON) & next(tDSN.__CLOCK__c) = 0))) & (__expr6 -> ((tDSN.location = ON & next(tDSN.location) = OFF) & __expr4))) & (tDSN.start <-> __expr5)) & (tDSN.end <-> __expr6))) & (((((tSBO.EVENT = STUTTER -> (tSBO.location = next(tSBO.location) & __expr7)) & (__expr8 -> ((tSBO.location = OFF & next(tSBO.location) = ON) & next(tSBO.__CLOCK__c) = 0))) & (__expr9 -> ((tSBO.location = ON & next(tSBO.location) = OFF) & __expr7))) & (tSBO.start <-> __expr8)) & (tSBO.end <-> __expr9))) & (((((tTCM.EVENT = STUTTER -> (tTCM.location = next(tTCM.location) & __expr10)) & (__expr11 -> ((tTCM.location = OFF & next(tTCM.location) = ON) & next(tTCM.__CLOCK__c) = 0))) & (__expr12 -> ((tTCM.location = ON & next(tTCM.location) = OFF) & __expr10))) & (tTCM.start <-> __expr11)) & (tTCM.end <-> __expr12))) & ((((((((((((((((((((((((((((((((((global_clock = next(global_clock) & (__expr2 -> next(CHARGE_running_))) & (__expr3 -> !next(CHARGE_running_))) & (__expr5 -> next(DSN_running_))) & (__expr6 -> !next(DSN_running_))) & (__expr8 -> next(SBO_running_))) & (__expr9 -> !next(SBO_running_))) & (__expr11 -> next(TCM_running_))) & (__expr12 -> !next(TCM_running_))) & ((__expr3 & tCHARGE.__CLOCK__c <= 90) -> next(soc) = soc + 4 * tCHARGE.__CLOCK__c)) & (((__expr3 & tCHARGE.__CLOCK__c > 90) & tCHARGE.__CLOCK__c <= 110) -> next(soc) = soc + 445)) & (((__expr3 & tCHARGE.__CLOCK__c > 110) & tCHARGE.__CLOCK__c <= 130) -> next(soc) = soc + 535)) & (((__expr3 & tCHARGE.__CLOCK__c > 130) & tCHARGE.__CLOCK__c <= 150) -> next(soc) = soc + 625)) & (((__expr3 & tCHARGE.__CLOCK__c > 150) & tCHARGE.__CLOCK__c <= 170) -> next(soc) = soc + 715)) & (((__expr3 & tCHARGE.__CLOCK__c > 170) & tCHARGE.__CLOCK__c <= 190) -> next(soc) = soc + 805)) & (((__expr3 & tCHARGE.__CLOCK__c > 190) & tCHARGE.__CLOCK__c <= 210) -> next(soc) = soc + 895)) & (((__expr3 & tCHARGE.__CLOCK__c > 210) & tCHARGE.__CLOCK__c <= 230) -> next(soc) = soc + 985)) & ((__expr3 & tCHARGE.__CLOCK__c > 230) -> next(soc) = soc + 5 * tCHARGE.__CLOCK__c)) & ((__expr6 & tDSN.__CLOCK__c <= 45) -> next(soc) = soc - 2 * tDSN.__CLOCK__c)) & (((__expr6 & tDSN.__CLOCK__c > 45) & tDSN.__CLOCK__c <= 48) -> next(soc) = soc - 97)) & (((__expr6 & tDSN.__CLOCK__c > 48) & tDSN.__CLOCK__c <= 51) -> next(soc) = soc - 104)) & (((__expr6 & tDSN.__CLOCK__c > 51) & tDSN.__CLOCK__c <= 54) -> next(soc) = soc - 110)) & (((__expr6 & tDSN.__CLOCK__c > 54) & tDSN.__CLOCK__c <= 57) -> next(soc) = soc - 116)) & (((__expr6 & tDSN.__CLOCK__c > 57) & tDSN.__CLOCK__c <= 60) -> next(soc) = soc - 123)) & (((__expr6 & tDSN.__CLOCK__c > 60) & tDSN.__CLOCK__c <= 63) -> next(soc) = soc - 129)) & (((__expr6 & tDSN.__CLOCK__c > 63) & tDSN.__CLOCK__c <= 66) -> next(soc) = soc - 135)) & (((__expr6 & tDSN.__CLOCK__c > 66) & tDSN.__CLOCK__c <= 69) -> next(soc) = soc - 142)) & (((__expr6 & tDSN.__CLOCK__c > 69) & tDSN.__CLOCK__c <= 72) -> next(soc) = soc - 148)) & ((__expr6 & tDSN.__CLOCK__c > 72) -> next(soc) = soc - 2.2 * tDSN.__CLOCK__c)) & ((__expr9 & tSBO.__CLOCK__c <= 130) -> next(soc) = soc - 0.1 * tSBO.__CLOCK__c)) & (((__expr9 & tSBO.__CLOCK__c > 130) & tSBO.__CLOCK__c <= 170) -> next(soc) = soc - 23)) & (((__expr9 & tSBO.__CLOCK__c > 170) & tSBO.__CLOCK__c <= 210) -> next(soc) = soc - 28)) & ((__expr9 & tSBO.__CLOCK__c > 210) -> next(soc) = soc - 0.2 * tSBO.__CLOCK__c)) & (__expr12 -> next(soc) = soc - tTCM.__CLOCK__c)) & (soc != next(soc) -> (((__expr3 | __expr6) | __expr9) | __expr12)))) & __delta = 0) & (__iota & next(__iota))))
 
 TRANS
  (!(!__iota | !next(__iota)) | __expr0)
@@ -109,21 +125,29 @@ INVARSPEC
 
 
 -- Symbols introduced by the dumper:
-DEFINE __expr2 := tCHARGE.EVENT = CHARGE_END ;
+DEFINE __expr5 := tDSN.EVENT = DSN_START ;
 
-DEFINE __expr6 := tSBO.EVENT = SBO_END ;
+DEFINE __expr4 := next(tDSN.__CLOCK__c) = tDSN.__CLOCK__c ;
 
-DEFINE __expr7 := next(tTCM.__CLOCK__c) = tTCM.__CLOCK__c ;
-
-DEFINE __expr8 := tTCM.EVENT = TCM_END ;
-
-DEFINE __expr0 := time != next(time) ;
-
-DEFINE __expr3 := next(tDSN.__CLOCK__c) = tDSN.__CLOCK__c ;
+DEFINE __expr2 := tCHARGE.EVENT = CHARGE_START ;
 
 DEFINE __expr1 := next(tCHARGE.__CLOCK__c) = tCHARGE.__CLOCK__c ;
 
-DEFINE __expr4 := tDSN.EVENT = DSN_END ;
+DEFINE __expr8 := tSBO.EVENT = SBO_START ;
 
-DEFINE __expr5 := next(tSBO.__CLOCK__c) = tSBO.__CLOCK__c ;
+DEFINE __expr6 := tDSN.EVENT = DSN_END ;
+
+DEFINE __expr7 := next(tSBO.__CLOCK__c) = tSBO.__CLOCK__c ;
+
+DEFINE __expr0 := time != next(time) ;
+
+DEFINE __expr3 := tCHARGE.EVENT = CHARGE_END ;
+
+DEFINE __expr11 := tTCM.EVENT = TCM_START ;
+
+DEFINE __expr9 := tSBO.EVENT = SBO_END ;
+
+DEFINE __expr10 := next(tTCM.__CLOCK__c) = tTCM.__CLOCK__c ;
+
+DEFINE __expr12 := tTCM.EVENT = TCM_END ;
 

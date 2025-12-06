@@ -6,11 +6,6 @@ import z3
 from pacti.contracts import SmtIoContract
 
 
-CHARGE_running_entry = z3.Bool("BOOL_CHARGE_running_entry")
-DSN_running_entry = z3.Bool("BOOL_DSN_running_entry")
-SBO_running_entry = z3.Bool("BOOL_SBO_running_entry")
-TCM_running_entry = z3.Bool("BOOL_TCM_running_entry")
-
 ##### CHARGE CONTRACT #####
 
 CHARGE_start = z3.Real("t_0")
@@ -22,10 +17,6 @@ CHARGE_spec = SmtIoContract.from_z3_terms(
         "soc_entry",
         "t_0",
         "t_1",
-        "BOOL_CHARGE_running_entry",
-        "BOOL_DSN_running_entry",
-        "BOOL_SBO_running_entry",
-        "BOOL_TCM_running_entry",
     ],
     output_vars = [
         "soc_exit",
@@ -33,10 +24,6 @@ CHARGE_spec = SmtIoContract.from_z3_terms(
     assumptions = [
         0 <= CHARGE_end - CHARGE_start,
         0 <= soc_entry,
-        z3.Not(CHARGE_running_entry),
-        z3.Not(DSN_running_entry),
-        z3.Not(SBO_running_entry),
-        z3.Not(TCM_running_entry),
     ],
     guarantees = [
         4.0*(CHARGE_end-CHARGE_start) <= soc_exit - soc_entry,
@@ -56,10 +43,6 @@ DSN_spec = SmtIoContract.from_z3_terms(
         "soc_entry",
         "t_0",
         "t_1",
-        "BOOL_CHARGE_running_entry",
-        "BOOL_DSN_running_entry",
-        "BOOL_SBO_running_entry",
-        "BOOL_TCM_running_entry",
     ],
     output_vars = [
         "soc_exit",
@@ -68,10 +51,6 @@ DSN_spec = SmtIoContract.from_z3_terms(
         0 <= DSN_end-DSN_start,
         0 <= soc_entry,
         soc_entry >= 2.2 * (DSN_end-DSN_start),
-        z3.Not(CHARGE_running_entry),
-        z3.Not(DSN_running_entry),
-        z3.Not(SBO_running_entry),
-        z3.Not(TCM_running_entry),
     ],
     guarantees = [
         2.0 * (DSN_end-DSN_start) <= soc_entry - soc_exit,
@@ -91,10 +70,6 @@ SBO_spec = SmtIoContract.from_z3_terms(
         "soc_entry",
         "t_0",
         "t_1",
-        "BOOL_CHARGE_running_entry",
-        "BOOL_DSN_running_entry",
-        "BOOL_SBO_running_entry",
-        "BOOL_TCM_running_entry",
     ],
     output_vars = [
         "soc_exit",
@@ -103,10 +78,6 @@ SBO_spec = SmtIoContract.from_z3_terms(
         0 <= SBO_end-SBO_start,
         0 <= soc_entry,
         soc_entry >= 0.2 * (SBO_end-SBO_start),
-        z3.Not(CHARGE_running_entry),
-        z3.Not(DSN_running_entry),
-        z3.Not(SBO_running_entry),
-        z3.Not(TCM_running_entry),
     ],
     guarantees = [
         0.1 * (SBO_end-SBO_start) <= soc_entry - soc_exit,
@@ -126,10 +97,6 @@ TCM_spec = SmtIoContract.from_z3_terms(
         "soc_entry",
         "t_0",
         "t_1",
-        "BOOL_CHARGE_running_entry",
-        "BOOL_DSN_running_entry",
-        "BOOL_SBO_running_entry",
-        "BOOL_TCM_running_entry",
     ],
     output_vars = [
         "soc_exit",
@@ -138,10 +105,6 @@ TCM_spec = SmtIoContract.from_z3_terms(
         0 <= TCM_end-TCM_start,
         0 <= soc_entry,
         soc_entry >= 1.1 * (TCM_end-TCM_start),
-        z3.Not(CHARGE_running_entry),
-        z3.Not(DSN_running_entry),
-        z3.Not(SBO_running_entry),
-        z3.Not(TCM_running_entry),
     ],
     guarantees = [
         0.9 * (TCM_end-TCM_start) <= soc_entry - soc_exit,
@@ -267,18 +230,10 @@ CONCURRENCY_spec = {
 soc_entry = z3.Real("soc_entry")
 soc_exit = z3.Real("soc_exit")
 SAFETY_spec = SmtIoContract.from_z3_terms(
-    input_vars = ["soc_entry",
-                  "BOOL_CHARGE_running_entry",
-                  "BOOL_DSN_running_entry",
-                  "BOOL_SBO_running_entry",
-                  "BOOL_TCM_running_entry"],
+    input_vars = ["soc_entry"],
     output_vars = ["soc_exit"],
     assumptions = [
         soc_entry == 200,
-        z3.Not(CHARGE_running_entry),
-        z3.Not(DSN_running_entry),
-        z3.Not(SBO_running_entry),
-        z3.Not(TCM_running_entry),
     ],
     guarantees = [
         soc_exit >= 40,

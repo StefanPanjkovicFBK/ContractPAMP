@@ -116,13 +116,13 @@ tTCM : T_TCM();
 
 soc : real;
 
-BOOL_CHARGE_running : boolean;
+CHARGE_running_ : boolean;
 
-BOOL_DSN_running : boolean;
+DSN_running_ : boolean;
 
-BOOL_SBO_running : boolean;
+SBO_running_ : boolean;
 
-BOOL_TCM_running : boolean;
+TCM_running_ : boolean;
 
 INIT
 
@@ -130,27 +130,27 @@ INIT
 
 (soc = 200) &
 
-(!BOOL_CHARGE_running) & (!BOOL_DSN_running) & (!BOOL_SBO_running) & (!BOOL_TCM_running);
+(!CHARGE_running_) & (!DSN_running_) & (!SBO_running_) & (!TCM_running_);
 
 TRANS
 
 (global_clock = next(global_clock)) &
 
-((tCHARGE.EVENT = CHARGE_START) -> next(BOOL_CHARGE_running)) &
+((tCHARGE.EVENT = CHARGE_START) -> next(CHARGE_running_)) &
 
-((tCHARGE.EVENT = CHARGE_END) -> !next(BOOL_CHARGE_running)) &
+((tCHARGE.EVENT = CHARGE_END) -> !next(CHARGE_running_)) &
 
-((tDSN.EVENT = DSN_START) -> next(BOOL_DSN_running)) &
+((tDSN.EVENT = DSN_START) -> next(DSN_running_)) &
 
-((tDSN.EVENT = DSN_END) -> !next(BOOL_DSN_running)) &
+((tDSN.EVENT = DSN_END) -> !next(DSN_running_)) &
 
-((tSBO.EVENT = SBO_START) -> next(BOOL_SBO_running)) &
+((tSBO.EVENT = SBO_START) -> next(SBO_running_)) &
 
-((tSBO.EVENT = SBO_END) -> !next(BOOL_SBO_running)) &
+((tSBO.EVENT = SBO_END) -> !next(SBO_running_)) &
 
-((tTCM.EVENT = TCM_START) -> next(BOOL_TCM_running)) &
+((tTCM.EVENT = TCM_START) -> next(TCM_running_)) &
 
-((tTCM.EVENT = TCM_END) -> !next(BOOL_TCM_running)) &
+((tTCM.EVENT = TCM_END) -> !next(TCM_running_)) &
 
 ((tCHARGE.EVENT = CHARGE_END & tCHARGE.__CLOCK__c <= 90) -> (next(soc) = soc + 4 * tCHARGE.__CLOCK__c)) &
 
