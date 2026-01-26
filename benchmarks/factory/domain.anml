@@ -1,0 +1,28 @@
+constant integer steps;
+
+fluent integer completed_steps;
+fluent integer battery;
+fluent boolean working;
+fluent boolean cooling;
+
+action work() {
+    duration := 20;
+
+    [start] (not working) and (not cooling);
+    [start] completed_steps < steps;
+    [start] working := true;
+
+    [end] completed_steps := completed_steps + 1;
+    [end] working := false;
+};
+
+action cooldown() {
+    duration := 2;
+
+    [start] (not working) and (not cooling);
+    [start] battery > 0;
+    [start] cooling := true;
+
+    [end] battery := battery - 1;
+    [end] cooling := false;
+};

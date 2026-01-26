@@ -51,7 +51,7 @@ VAR location : {BROKEN, FIXED};
 
 IVAR EVENT : {FIX, SWITCH, STUTTER};
 
-INIT (location = FIXED) & (x = 0);
+INIT (location = FIXED) & (x = 2);
 
 INVAR
 
@@ -61,7 +61,7 @@ TRANS
 
 (EVENT = STUTTER -> location = next(location) & x = next(x)) &
 
-(EVENT = FIX -> (location = BROKEN & next(location) = BROKEN & next(x) = x + 1) | (location = BROKEN & next(location) = FIXED & x = next(x)) | (location = FIXED & next(location) = FIXED & next(x) = x)) &
+(EVENT = FIX -> (location = BROKEN & next(location) = BROKEN & next(x) = x + 1) | (location = BROKEN & next(location) = FIXED & next(x) = x + 1) | (location = FIXED & next(location) = FIXED & next(x) = x + 1)) &
 
 (EVENT = SWITCH -> location = FIXED & next(location) = BROKEN & next(x) = 0);
 
@@ -78,13 +78,33 @@ tfix : T_FIX();
 
 ccontroller : C_CONTROLLER();
 
+switch_running_ : boolean;
+
+fix_running_ : boolean;
+
 INIT
 
-(global_clock = 0);
+(global_clock = 0) &
+
+(!switch_running_) & (!fix_running_);
+
+INVAR
+
+((!switch_running_) -> tswitch.location = OFF) &
+
+((!fix_running_) -> tfix.location = OFF);
 
 TRANS
 
 (global_clock = next(global_clock)) &
+
+((tswitch.EVENT = SWITCH_START) -> next(switch_running_)) &
+
+((tswitch.EVENT = SWITCH_END) -> !next(switch_running_)) &
+
+((tfix.EVENT = FIX_START) -> next(fix_running_)) &
+
+((tfix.EVENT = FIX_END) -> !next(fix_running_)) &
 
 (tswitch.EVENT = SWITCH_END <-> ccontroller.EVENT = SWITCH) &
 

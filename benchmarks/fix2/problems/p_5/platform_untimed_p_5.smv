@@ -21,6 +21,8 @@ tfix.start : boolean;
 tfix.end : boolean;
 ccontroller.location : {BROKEN, FIXED};
 ccontroller.x : real;
+switch_running_ : boolean;
+fix_running_ : boolean;
 time : real;
 __iota : boolean;
 
@@ -42,19 +44,25 @@ CONSTANTS
 -- Assignments from layer 'Untime_monitors'
 
 INIT
- tswitch.location = OFF
-
-INIT
- tfix.location = OFF
-
-INIT
  __expr1
 
 INIT
- ccontroller.x = 0
+ __expr2
+
+INIT
+ __expr3
+
+INIT
+ ccontroller.x = 5
 
 INIT
  global_clock = 0
+
+INIT
+ !switch_running_
+
+INIT
+ !fix_running_
 
 INIT
  time = 0
@@ -64,14 +72,20 @@ INIT
 
 
 INVAR
- (__expr2 -> ccontroller.x <= 4)
+ (!fix_running_ -> __expr2)
+
+INVAR
+ (!switch_running_ -> __expr1)
+
+INVAR
+ (__expr4 -> ccontroller.x <= 4)
 
 
 TRANS
- (!__expr0 | (__delta > 0 & (((((((((next(global_clock) = global_clock + __delta & next(tswitch.location) = tswitch.location) & next(tswitch.start) = tswitch.start) & next(tswitch.end) = tswitch.end) & next(tfix.location) = tfix.location) & next(tfix.start) = tfix.start) & next(tfix.end) = tfix.end) & next(ccontroller.location) = ccontroller.location) & __expr3) & next(time) = time + __delta)))
+ (!__expr0 | (__delta > 0 & (((((((((((next(global_clock) = global_clock + __delta & next(tswitch.location) = tswitch.location) & next(tswitch.start) = tswitch.start) & next(tswitch.end) = tswitch.end) & next(tfix.location) = tfix.location) & next(tfix.start) = tfix.start) & next(tfix.end) = tfix.end) & next(ccontroller.location) = ccontroller.location) & next(ccontroller.x) = ccontroller.x) & next(switch_running_) = switch_running_) & next(fix_running_) = fix_running_) & next(time) = time + __delta)))
 
 TRANS
- (__expr0 | ((((((((((tswitch.EVENT = STUTTER -> tswitch.location = next(tswitch.location)) & (tswitch.EVENT = SWITCH_START -> (tswitch.location = OFF & next(tswitch.location) = SWITCHING))) & (__expr4 -> (tswitch.location = SWITCHING & next(tswitch.location) = OFF))) & (tswitch.start <-> tswitch.EVENT = SWITCH_START)) & (tswitch.end <-> __expr4)) & (((((tfix.EVENT = STUTTER -> tfix.location = next(tfix.location)) & (tfix.EVENT = FIX_START -> (tfix.location = OFF & next(tfix.location) = FIXING))) & (__expr5 -> (tfix.location = FIXING & next(tfix.location) = OFF))) & (tfix.start <-> tfix.EVENT = FIX_START)) & (tfix.end <-> __expr5))) & (((ccontroller.EVENT = STUTTER -> (ccontroller.location = next(ccontroller.location) & __expr6)) & (ccontroller.EVENT = FIX -> ((((__expr2 & __expr7) & next(ccontroller.x) = ccontroller.x + 1) | ((__expr2 & __expr8) & __expr6)) | ((__expr1 & __expr8) & __expr3)))) & (ccontroller.EVENT = SWITCH -> ((__expr1 & __expr7) & next(ccontroller.x) = 0)))) & ((global_clock = next(global_clock) & (__expr4 <-> ccontroller.EVENT = SWITCH)) & (__expr5 <-> ccontroller.EVENT = FIX))) & __delta = 0) & (__iota & next(__iota))))
+ (__expr0 | ((((((((((tswitch.EVENT = STUTTER -> tswitch.location = next(tswitch.location)) & (__expr5 -> (__expr1 & next(tswitch.location) = SWITCHING))) & (__expr6 -> (tswitch.location = SWITCHING & next(tswitch.location) = OFF))) & (tswitch.start <-> __expr5)) & (tswitch.end <-> __expr6)) & (((((tfix.EVENT = STUTTER -> tfix.location = next(tfix.location)) & (__expr7 -> (__expr2 & next(tfix.location) = FIXING))) & (__expr8 -> (tfix.location = FIXING & next(tfix.location) = OFF))) & (tfix.start <-> __expr7)) & (tfix.end <-> __expr8))) & (((ccontroller.EVENT = STUTTER -> (ccontroller.location = next(ccontroller.location) & ccontroller.x = next(ccontroller.x))) & (ccontroller.EVENT = FIX -> ((((__expr4 & __expr9) & __expr10) | ((__expr4 & __expr11) & __expr10)) | ((__expr3 & __expr11) & __expr10)))) & (ccontroller.EVENT = SWITCH -> ((__expr3 & __expr9) & next(ccontroller.x) = 0)))) & ((((((global_clock = next(global_clock) & (__expr5 -> next(switch_running_))) & (__expr6 -> !next(switch_running_))) & (__expr7 -> next(fix_running_))) & (__expr8 -> !next(fix_running_))) & (__expr6 <-> ccontroller.EVENT = SWITCH)) & (__expr8 <-> ccontroller.EVENT = FIX))) & __delta = 0) & (__iota & next(__iota))))
 
 TRANS
  (!(!__iota | !next(__iota)) | __expr0)
@@ -83,21 +97,27 @@ TRANS
 
 
 -- Symbols introduced by the dumper:
-DEFINE __expr3 := next(ccontroller.x) = ccontroller.x ;
+DEFINE __expr11 := next(ccontroller.location) = FIXED ;
 
-DEFINE __expr1 := ccontroller.location = FIXED ;
+DEFINE __expr4 := ccontroller.location = BROKEN ;
 
-DEFINE __expr6 := ccontroller.x = next(ccontroller.x) ;
+DEFINE __expr8 := tfix.EVENT = FIX_END ;
+
+DEFINE __expr6 := tswitch.EVENT = SWITCH_END ;
+
+DEFINE __expr3 := ccontroller.location = FIXED ;
+
+DEFINE __expr1 := tswitch.location = OFF ;
+
+DEFINE __expr10 := next(ccontroller.x) = ccontroller.x + 1 ;
 
 DEFINE __expr0 := time != next(time) ;
 
-DEFINE __expr8 := next(ccontroller.location) = FIXED ;
+DEFINE __expr9 := next(ccontroller.location) = BROKEN ;
 
-DEFINE __expr2 := ccontroller.location = BROKEN ;
+DEFINE __expr7 := tfix.EVENT = FIX_START ;
 
-DEFINE __expr5 := tfix.EVENT = FIX_END ;
+DEFINE __expr5 := tswitch.EVENT = SWITCH_START ;
 
-DEFINE __expr4 := tswitch.EVENT = SWITCH_END ;
-
-DEFINE __expr7 := next(ccontroller.location) = BROKEN ;
+DEFINE __expr2 := tfix.location = OFF ;
 

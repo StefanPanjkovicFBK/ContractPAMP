@@ -1,0 +1,8 @@
+steps := 2;
+
+[start] completed_steps := 0;
+[start] battery := 10;
+[start] working := false;
+[start] cooling := false;
+
+[end] completed_steps == steps;

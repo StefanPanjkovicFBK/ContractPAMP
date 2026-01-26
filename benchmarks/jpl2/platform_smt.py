@@ -115,115 +115,117 @@ TCM_spec = SmtIoContract.from_z3_terms(
 
 ##### CHARGE_DSN CONTRACT #####
 
-t_0 = z3.Real("t_0")
-t_1 = z3.Real("t_1")
-t_2 = z3.Real("t_2")
-t_3 = z3.Real("t_3")
-soc_entry = z3.Real("soc_entry")
-soc_exit = z3.Real("soc_exit")
-CHARGE_DSN_spec = SmtIoContract.from_z3_terms(
-    input_vars = [
-        "soc_entry",
-        "t_0",
-        "t_1",
-        "t_2",
-        "t_3",
-    ],
-    output_vars = [
-        "soc_exit",
-    ],
-    assumptions = [
-        0 <= t_3-t_0,
-        0 <= soc_entry,
-        soc_entry <= 200,
-    ],
-    guarantees = [
-        1.8*(t_3-t_0) <= soc_exit - soc_entry,
-        soc_exit - soc_entry <= 3.0*(t_3-t_0),
-        0 <= soc_exit,
-    ]
-)
+# t_0 = z3.Real("t_0")
+# t_1 = z3.Real("t_1")
+# t_2 = z3.Real("t_2")
+# t_3 = z3.Real("t_3")
+# soc_entry = z3.Real("soc_entry")
+# soc_exit = z3.Real("soc_exit")
+# CHARGE_DSN_spec = SmtIoContract.from_z3_terms(
+#     input_vars = [
+#         "soc_entry",
+#         "t_0",
+#         "t_1",
+#         "t_2",
+#         "t_3",
+#     ],
+#     output_vars = [
+#         "soc_exit",
+#     ],
+#     assumptions = [
+#         0 <= t_3-t_0,
+#         0 <= soc_entry,
+#         soc_entry <= 200,
+#     ],
+#     guarantees = [
+#         1.8*(t_3-t_0) <= soc_exit - soc_entry,
+#         soc_exit - soc_entry <= 3.0*(t_3-t_0),
+#         0 <= soc_exit,
+#     ]
+# )
 
 ##### CHARGE_SBO CONTRACT #####
 
-t_0 = z3.Real("t_0")
-t_1 = z3.Real("t_1")
-t_2 = z3.Real("t_2")
-t_3 = z3.Real("t_3")
-soc_entry = z3.Real("soc_entry")
-soc_exit = z3.Real("soc_exit")
-CHARGE_SBO_spec = SmtIoContract.from_z3_terms(
-    input_vars = [
-        "soc_entry",
-        "t_0",
-        "t_1",
-        "t_2",
-        "t_3",
-    ],
-    output_vars = [
-        "soc_exit",
-    ],
-    assumptions = [
-        0 <= t_3-t_0,
-        0 <= soc_entry,
-        soc_entry <= 200,
-    ],
-    guarantees = [
-        3.8*(t_3-t_0) <= soc_exit - soc_entry,
-        soc_exit - soc_entry <= 4.9*(t_3-t_0),
-        0 <= soc_exit,
-    ]
-)
+# t_0 = z3.Real("t_0")
+# t_1 = z3.Real("t_1")
+# t_2 = z3.Real("t_2")
+# t_3 = z3.Real("t_3")
+# soc_entry = z3.Real("soc_entry")
+# soc_exit = z3.Real("soc_exit")
+# CHARGE_SBO_spec = SmtIoContract.from_z3_terms(
+#     input_vars = [
+#         "soc_entry",
+#         "t_0",
+#         "t_1",
+#         "t_2",
+#         "t_3",
+#     ],
+#     output_vars = [
+#         "soc_exit",
+#     ],
+#     assumptions = [
+#         0 <= t_3-t_0,
+#         0 <= soc_entry,
+#         soc_entry <= 200,
+#     ],
+#     guarantees = [
+#         3.8*(t_3-t_0) <= soc_exit - soc_entry,
+#         soc_exit - soc_entry <= 4.9*(t_3-t_0),
+#         0 <= soc_exit,
+#     ]
+# )
 
 ##### CHARGE_TCM CONTRACT #####
 
-t_0 = z3.Real("t_0")
-t_1 = z3.Real("t_1")
-t_2 = z3.Real("t_2")
-t_3 = z3.Real("t_3")
-soc_entry = z3.Real("soc_entry")
-soc_exit = z3.Real("soc_exit")
-CHARGE_TCM_spec = SmtIoContract.from_z3_terms(
-    input_vars = [
-        "soc_entry",
-        "t_0",
-        "t_1",
-        "t_2",
-        "t_3",
-    ],
-    output_vars = [
-        "soc_exit",
-    ],
-    assumptions = [
-        0 <= t_3-t_0,
-        0 <= soc_entry,
-        soc_entry <= 200,
-    ],
-    guarantees = [
-        2.9*(t_3-t_0) <= soc_exit - soc_entry,
-        soc_exit - soc_entry <= 4.1*(t_3-t_0),
-        0 <= soc_exit,
-    ]
-)
+# t_0 = z3.Real("t_0")
+# t_1 = z3.Real("t_1")
+# t_2 = z3.Real("t_2")
+# t_3 = z3.Real("t_3")
+# soc_entry = z3.Real("soc_entry")
+# soc_exit = z3.Real("soc_exit")
+# CHARGE_TCM_spec = SmtIoContract.from_z3_terms(
+#     input_vars = [
+#         "soc_entry",
+#         "t_0",
+#         "t_1",
+#         "t_2",
+#         "t_3",
+#     ],
+#     output_vars = [
+#         "soc_exit",
+#     ],
+#     assumptions = [
+#         0 <= t_3-t_0,
+#         0 <= soc_entry,
+#         soc_entry <= 200,
+#     ],
+#     guarantees = [
+#         2.9*(t_3-t_0) <= soc_exit - soc_entry,
+#         soc_exit - soc_entry <= 4.1*(t_3-t_0),
+#         0 <= soc_exit,
+#     ]
+# )
 
 ##### CONCURRENCY #####
 
-CONCURRENCY_spec = {
-    ("CHARGE_start", "DSN_start", "CHARGE_end", "DSN_end") : ("CHARGE_DSN", CHARGE_DSN_spec),
-    ("CHARGE_start", "DSN_start", "DSN_end", "CHARGE_end") : ("CHARGE_DSN", CHARGE_DSN_spec),
-    ("DSN_start", "CHARGE_start", "DSN_end", "CHARGE_end") : ("CHARGE_DSN", CHARGE_DSN_spec),
-    ("DSN_start", "CHARGE_start", "CHARGE_end", "DSN_end") : ("CHARGE_DSN", CHARGE_DSN_spec),
+# CONCURRENCY_spec = {
+#     ("CHARGE_start", "DSN_start", "CHARGE_end", "DSN_end") : ("CHARGE_DSN", CHARGE_DSN_spec),
+#     ("CHARGE_start", "DSN_start", "DSN_end", "CHARGE_end") : ("CHARGE_DSN", CHARGE_DSN_spec),
+#     ("DSN_start", "CHARGE_start", "DSN_end", "CHARGE_end") : ("CHARGE_DSN", CHARGE_DSN_spec),
+#     ("DSN_start", "CHARGE_start", "CHARGE_end", "DSN_end") : ("CHARGE_DSN", CHARGE_DSN_spec),
 
-    ("CHARGE_start", "SBO_start", "CHARGE_end", "SBO_end") : ("CHARGE_SBO", CHARGE_SBO_spec),
-    ("CHARGE_start", "SBO_start", "SBO_end", "CHARGE_end") : ("CHARGE_SBO", CHARGE_SBO_spec),
-    ("SBO_start", "CHARGE_start", "SBO_end", "CHARGE_end") : ("CHARGE_SBO", CHARGE_SBO_spec),
-    ("SBO_start", "CHARGE_start", "CHARGE_end", "SBO_end") : ("CHARGE_SBO", CHARGE_SBO_spec),
+#     ("CHARGE_start", "SBO_start", "CHARGE_end", "SBO_end") : ("CHARGE_SBO", CHARGE_SBO_spec),
+#     ("CHARGE_start", "SBO_start", "SBO_end", "CHARGE_end") : ("CHARGE_SBO", CHARGE_SBO_spec),
+#     ("SBO_start", "CHARGE_start", "SBO_end", "CHARGE_end") : ("CHARGE_SBO", CHARGE_SBO_spec),
+#     ("SBO_start", "CHARGE_start", "CHARGE_end", "SBO_end") : ("CHARGE_SBO", CHARGE_SBO_spec),
 
-    ("CHARGE_start", "TCM_start", "CHARGE_end", "TCM_end") : ("CHARGE_TCM", CHARGE_TCM_spec),
-    ("CHARGE_start", "TCM_start", "TCM_end", "CHARGE_end") : ("CHARGE_TCM", CHARGE_TCM_spec),
-    ("TCM_start", "CHARGE_start", "TCM_end", "CHARGE_end") : ("CHARGE_TCM", CHARGE_TCM_spec),
-    ("TCM_start", "CHARGE_start", "CHARGE_end", "TCM_end") : ("CHARGE_TCM", CHARGE_TCM_spec),
-}
+#     ("CHARGE_start", "TCM_start", "CHARGE_end", "TCM_end") : ("CHARGE_TCM", CHARGE_TCM_spec),
+#     ("CHARGE_start", "TCM_start", "TCM_end", "CHARGE_end") : ("CHARGE_TCM", CHARGE_TCM_spec),
+#     ("TCM_start", "CHARGE_start", "TCM_end", "CHARGE_end") : ("CHARGE_TCM", CHARGE_TCM_spec),
+#     ("TCM_start", "CHARGE_start", "CHARGE_end", "TCM_end") : ("CHARGE_TCM", CHARGE_TCM_spec),
+# }
+
+CONCURRENCY_spec = {}
 
 ##### SAFETY CONTRACT #####
 

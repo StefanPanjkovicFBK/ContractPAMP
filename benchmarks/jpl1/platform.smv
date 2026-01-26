@@ -132,6 +132,16 @@ INIT
 
 (!CHARGE_running_) & (!DSN_running_) & (!SBO_running_) & (!TCM_running_);
 
+INVAR
+
+((!CHARGE_running_) -> tCHARGE.location = OFF) &
+
+((!DSN_running_) -> tDSN.location = OFF) &
+
+((!SBO_running_) -> tSBO.location = OFF) &
+
+((!TCM_running_) -> tTCM.location = OFF);
+
 TRANS
 
 (global_clock = next(global_clock)) &

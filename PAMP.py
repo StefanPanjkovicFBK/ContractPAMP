@@ -22,7 +22,7 @@ from tamerlite.core import wastar_search, astar_search, gbfs_search
 from tamerlite.core import bfs_search, dfs_search, ehc_search
 from tamerlite.core import multiqueue_search
 from tamerlite.core import evaluate, make_fluent_node
-from tamerlite.core import HFF, HAdd, CustomHeuristic, RLRank, RLHeuristic
+from tamerlite.core import HFF, HAdd, CustomHeuristic
 from tamerlite.converter import Converter
 from tamerlite.encoder import Encoder, get_encoders
 from tamerlite.core.search import PrioritizedItem
@@ -666,10 +666,10 @@ class Solver():
                             self.cut_cache[str(path[:(i+1)])] = psi
                             break
                     else:
-                        print("trace:")
-                        for step in trace.get_steps():
-                            print("step:")
-                            print(step.get_assignments())
+                        # print("trace:")
+                        # for step in trace.get_steps():
+                        #     print("step:")
+                        #     print(step.get_assignments())
                         print("Start computing psi")
                         psi = self.update_psi(pysmtEnv, productModel, path, i, psi, trace)
                         print("End computing psi")

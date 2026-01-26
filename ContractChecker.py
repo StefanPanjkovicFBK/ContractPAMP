@@ -28,7 +28,7 @@ from tamerlite.core import wastar_search, astar_search, gbfs_search
 from tamerlite.core import bfs_search, dfs_search, ehc_search
 from tamerlite.core import multiqueue_search
 from tamerlite.core import evaluate, make_fluent_node
-from tamerlite.core import HFF, HAdd, CustomHeuristic, RLRank, RLHeuristic
+from tamerlite.core import HFF, HAdd, CustomHeuristic
 from tamerlite.converter import Converter
 from tamerlite.encoder import Encoder, get_encoders
 from tamerlite.core.search import PrioritizedItem
@@ -74,7 +74,7 @@ def parse_args():
 
 
 class Checker():
-    def build_automaton(self, pysmtEnv, contractName, contractSpec, ttsPlatform):
+    def build_automaton(self, pysmtEnv, contractName, contractSpec, ttsPlatform, safetyContract):
         mgr = pysmtEnv.formula_manager
         z3Solver = pysmtEnv.factory.Solver(name="z3")
 
@@ -169,8 +169,9 @@ class Checker():
             varEntry = mgr.Symbol((var.symbol_name())[:-5]+"_entry", var.symbol_type())
             subs[varEntry] = var
         composedModel.add_init(contractAssumptions.substitute(subs))
-        composedModel.add_init(mgr.Equals(global_clock, mgr.Real(0)))
-        composedModel.add_init(mgr.Equals(mgr.Symbol("t_0", types.REAL), mgr.Real(0)))
+        composedModel.add_init(mgr.Equals(global_clock, mgr.Symbol("t_0", types.REAL)))
+        # composedModel.add_init(mgr.Equals(global_clock, mgr.Real(0)))
+        # composedModel.add_init(mgr.Equals(mgr.Symbol("t_0", types.REAL), mgr.Real(0)))
         composedModel.add_init(mgr.And(*[mgr.Not(v) for v in runningVars]))
         for (var, sVar) in startVars.items():
             if var.symbol_type() != sVar.symbol_type():
@@ -235,51 +236,70 @@ class Checker():
             subs[varExit] = var
         
         t1 = mgr.Symbol("t_1", types.REAL)
+        taskRunning = mgr.Symbol(contractName+"_running___AT0", types.BOOL)
         gAfter = contractGuarantees.substitute(subs)
-        subs[t1] = global_clock
-        gDuring = contractGuarantees.substitute(subs)
-        safetyDuring = mgr.Implies(mgr.LE(global_clock, t1), gDuring)
-        safetyAfter = mgr.Implies(mgr.And(mgr.LT(t1, global_clock), mgr.LE(global_clock, mgr.Plus(t1, mgr.Real(100)))), gAfter)
+        # subs[t1] = global_clock
+        # gDuring = contractGuarantees.substitute(subs)
+        # safetyDuring = mgr.Implies(mgr.LE(global_clock, t1), gDuring)
+        safetyAfter = mgr.Implies(mgr.And(mgr.LT(t1, global_clock), mgr.LE(global_clock, mgr.Plus(t1, mgr.Real(6)))), gAfter)
 
-        composedModel.add_invar_property(mgr.And(safetyDuring, safetyAfter))
+        safetyGuarantees = (mgr.And(*[z3Solver.converter.back(term.expression) for term in safetyContract.g.terms])).substitute(subs)
+        convexSafety = mgr.Implies(mgr.And(safetyGuarantees, mgr.F(mgr.And(mgr.Equals(global_clock, t1),
+                                                                           mgr.Not(taskRunning),
+                                                                           safetyGuarantees))),
+                                   mgr.G(mgr.Implies(mgr.LE(global_clock, mgr.Plus(t1, mgr.Real(6))), safetyGuarantees)))
+
+        composedModel.add_invar_property(safetyAfter)
         composedModel.add_invar_property(mgr.Not(mgr.Equals(planLocation, mgr.Real(3))))
-        print("invar1:")
-        print(mgr.And(safetyDuring, safetyAfter).serialize())
-        print("invar2:")
-        print(mgr.Not(mgr.Equals(planLocation, mgr.Real(3))).serialize())
+        composedModel.add_ltl_property(convexSafety)
+        # print("property 1:")
+        # print(safetyAfter.serialize())
+        # print("property 2:")
+        # print(mgr.Not(mgr.Equals(planLocation, mgr.Real(3))).serialize())
+        # print("property 3:")
+        # print(convexSafety.serialize())
         return composedModel
 
     def check_model(self, model):
         solver = Ic3iaSolver(model)
         results = solver.check_properties()
         if results[0].is_unsafe():
-            print("invar1 violated")
+            print("property 1 violated")
             return False, results[0].get_trace()
         if results[1].is_unsafe():
-            print("invar2 violated")
+            print("property 2 violated")
             return False, results[1].get_trace()
+        if results[2].is_unsafe():
+            print("property 3 violated")
+            return False, results[2].get_trace()
         return True, None
 
     def check(self, pysmtEnv, planningDomain, planningInstance, contractPlatform, ttsPlatform):
         reader = ANMLReader()
         self.planning_problem = reader.parse_problem([planningDomain.name, planningInstance.name])
+        success = True
         for (contractName, contractSpec) in contractPlatform.items():
             if contractName != "theory" and contractName != "CONCURRENCY" and contractName != "SAFETY":
-                composedAutomaton = self.build_automaton(pysmtEnv, contractName, contractSpec, ttsPlatform)
-                print("Start model checking")
-                print(contractName)
-                print(contractSpec)
+                composedAutomaton = self.build_automaton(pysmtEnv, contractName, contractSpec, ttsPlatform, contractPlatform["SAFETY"])
+                # print("Start model checking")
+                # print(contractName)
+                # print(contractSpec)
                 safe, trace = self.check_model(composedAutomaton)
-                print("End model checking")
+                # print("End model checking")
                 if safe:
                     print("Contract OK!")
                 else:
+                    success = False
                     print("Contract BAD!")
                     print("trace:")
                     for step in trace.get_steps():
-                            print("step:")
-                            print(step.get_assignments())
+                        print("step:")
+                        print(step.get_assignments())
                 #print(composedAutomaton)
+        if success:
+            print("Contract validation successful!")
+        else:
+            print("Contract validation failed!")
 
 
 def main():

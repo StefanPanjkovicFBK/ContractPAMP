@@ -18,7 +18,7 @@ from tamerlite.core import wastar_search, astar_search, gbfs_search
 from tamerlite.core import bfs_search, dfs_search, ehc_search
 from tamerlite.core import multiqueue_search
 from tamerlite.core import evaluate, make_fluent_node
-from tamerlite.core import HFF, HAdd, CustomHeuristic, RLRank, RLHeuristic
+from tamerlite.core import HFF, HAdd, CustomHeuristic
 from tamerlite.converter import Converter
 from tamerlite.encoder import Encoder, get_encoders
 from tamerlite.core.search import PrioritizedItem
@@ -365,9 +365,9 @@ class Solver():
                 composedContract = self.rename_vars(newContract, i, currentTimepoint)
             else:
                 newContractRenamed = self.rename_vars(newContract, i, currentTimepoint)
-                print("Composing:")
-                print(newContractRenamed)
-                print(composedContract)
+                # print("Composing:")
+                # print(newContractRenamed)
+                # print(composedContract)
                 try:
                     composedContract = newContractRenamed.compose(composedContract, vars_to_keep=newContractRenamed.outputvars)
                 except:
@@ -381,14 +381,14 @@ class Solver():
                     print("\n")
                     return path[currentTimepoint:]
             
-            print("composedContract:")
-            print(composedContract)
+            # print("composedContract:")
+            # print(composedContract)
             durationsContract = self.generate_durations_contract(tn, path[currentTimepoint:], platform, platform["theory"], currentTimepoint)
-            print("durationsContract:")
-            print(durationsContract)
+            # print("durationsContract:")
+            # print(durationsContract)
             safetyContract = self.generate_safety_contract(i, len(overlappingSeqs), platform["SAFETY"], platform["theory"])
-            print("safetyContract:")
-            print(safetyContract)
+            # print("safetyContract:")
+            # print(safetyContract)
 
             try:
                 composedDurationsContract = composedContract.merge(durationsContract)
@@ -425,8 +425,8 @@ class Solver():
                         print(f"{ev.action} END")
                 print("\n")
                 return path[currentTimepoint:]
-            print("quotientContract:")
-            print(quotientContract)
+            # print("quotientContract:")
+            # print(quotientContract)
         return None
     
     def validate(self, tn, path, planningProblem, platform):
@@ -472,9 +472,9 @@ class Solver():
                 else:
                     newContractRenamed = self.rename_vars(newContract, i, currentTimepoint)
                     currentTimepoint += len(seq)
-                    print("Composing:")
-                    print(composedContract)
-                    print(newContractRenamed)
+                    # print("Composing:")
+                    # print(composedContract)
+                    # print(newContractRenamed)
                     try:
                         composedContract = composedContract.compose(newContractRenamed, vars_to_keep=composedContract.outputvars)
                     except:
@@ -489,14 +489,14 @@ class Solver():
                         return False, None, path[:currentTimepoint], badSeq
                 (self.contract_cache)[tuple(contractList)] = composedContract
 
-            print("composedContract:")
-            print(composedContract)
+            # print("composedContract:")
+            # print(composedContract)
             durationsContract = self.generate_durations_contract(tn, path[:currentTimepoint], platform, platform["theory"], 0)
-            print("durationsContract:")
-            print(durationsContract)
+            # print("durationsContract:")
+            # print(durationsContract)
             safetyContract = self.generate_safety_contract(0, i+1, platform["SAFETY"], platform["theory"])
-            print("safetyContract:")
-            print(safetyContract)
+            # print("safetyContract:")
+            # print(safetyContract)
 
             try:
                 composedDurationsContract = composedContract.merge(durationsContract)
@@ -533,18 +533,18 @@ class Solver():
                 print("\n")
                 badSeq = self.find_bad_seq(tn, path[:currentTimepoint], platform, overlappingSeqs[:(i+1)])
                 return False, None, path[:currentTimepoint], badSeq
-            print("composedDurationsContract:")
-            print(composedDurationsContract)
-            print("quotientContract:")
-            print(quotientContract)
-            print("\n")
+            # print("composedDurationsContract:")
+            # print(composedDurationsContract)
+            # print("quotientContract:")
+            # print(quotientContract)
+            # print("\n")
             # resultingSystemContract = quotientContract.compose(composedDurationsContract)
             # assert resultingSystemContract.refines(safetyContract)
         
         durationsFormula = self.build_durations_formula(quotientContract, platform["theory"])
-        print("durationsFormula:")
-        print(durationsFormula)
-        print("\n")
+        # print("durationsFormula:")
+        # print(durationsFormula)
+        # print("\n")
         
         z3Solver = z3.Solver()
         z3Solver.add(durationsFormula)

@@ -1,0 +1,160 @@
+-- Flattened FSM model generated from stdin
+-- Dumped layers are: model Untime_monitors 
+
+MODULE main
+-- Input variables from layer 'model'
+IVAR
+twork.EVENT : {WORK_START, RUN, WORK_END, STUTTER};
+tcooldown.EVENT : {COOL_START, COOL_END, STUTTER};
+cmachine.EVENT : {TURN_ON, RUN, FINISH, COOLED, COOL, STUTTER};
+ccontroller.EVENT : {WORK_DONE, SWITCH_OFF, STUTTER};
+__delta : real;
+
+-- Input variables from layer 'Untime_monitors'
+-- State variables from layer 'model'
+VAR
+global_clock : real;
+twork.__CLOCK__c_2 : real;
+cmachine.__CLOCK__c_1 : real;
+twork.location : {OFF, READY, RUNNING};
+twork.start : boolean;
+twork.end : boolean;
+tcooldown.location : {OFF, COOLING};
+tcooldown.start : boolean;
+tcooldown.end : boolean;
+cmachine.location : {OFF, IDLE, RUNNING, COOLING};
+ccontroller.location : {ON, OFF};
+BOOL_cooling : boolean;
+work_running_ : boolean;
+cooldown_running_ : boolean;
+time : real;
+__iota : boolean;
+
+-- State variables from layer 'Untime_monitors'
+-- Frozen variables from layer 'model'
+-- Frozen variables from layer 'Untime_monitors'
+-- Functions from layer 'model'
+-- Functions from layer 'Untime_monitors'
+-- Defines from layer 'model'
+DEFINE
+__is_timed_trans := __expr0;
+
+-- Defines from layer 'Untime_monitors'
+CONSTANTS
+ OFF, READY, RUNNING, WORK_START, RUN, WORK_END, STUTTER, COOLING, COOL_START, COOL_END, IDLE, TURN_ON, FINISH, COOLED, COOL, ON, WORK_DONE, SWITCH_OFF ;
+
+-- Assignments from layer 'model'
+
+-- Assignments from layer 'Untime_monitors'
+
+INIT
+ __expr1
+
+INIT
+ twork.__CLOCK__c_2 = 0
+
+INIT
+ __expr2
+
+INIT
+ __expr3
+
+INIT
+ cmachine.__CLOCK__c_1 = 11
+
+INIT
+ __expr4
+
+INIT
+ global_clock = 0
+
+INIT
+ __expr5
+
+INIT
+ !cooldown_running_
+
+INIT
+ time = 0
+
+INIT
+ __iota
+
+
+INVAR
+ (BOOL_cooling <-> __expr6)
+
+INVAR
+ (!cooldown_running_ -> __expr2)
+
+INVAR
+ (__expr5 -> (__expr3 | __expr6))
+
+INVAR
+ (__expr5 -> __expr1)
+
+INVAR
+ (ccontroller.location = OFF -> global_clock >= 65)
+
+INVAR
+ (__expr4 -> global_clock <= 65)
+
+INVAR
+ (__expr6 -> cmachine.__CLOCK__c_1 <= 10)
+
+INVAR
+ (twork.location = READY -> twork.__CLOCK__c_2 <= 5)
+
+
+TRANS
+ (!__expr0 | (__delta > 0 & ((((((((((((((next(global_clock) = global_clock + __delta & next(twork.__CLOCK__c_2) = twork.__CLOCK__c_2 + __delta) & next(cmachine.__CLOCK__c_1) = cmachine.__CLOCK__c_1 + __delta) & __expr7) & next(twork.start) = twork.start) & next(twork.end) = twork.end) & __expr8) & next(tcooldown.start) = tcooldown.start) & next(tcooldown.end) = tcooldown.end) & __expr9) & __expr10) & next(BOOL_cooling) = BOOL_cooling) & next(work_running_) = work_running_) & next(cooldown_running_) = cooldown_running_) & next(time) = time + __delta)))
+
+TRANS
+ (__expr0 | (((((((((((__expr11 -> ((__expr1 & next(twork.location) = READY) & next(twork.__CLOCK__c_2) = 0)) & (twork.EVENT = RUN -> ((twork.location = READY & next(twork.location) = RUNNING) & __expr12))) & (__expr13 -> ((twork.location = RUNNING & next(twork.location) = OFF) & __expr12))) & (twork.EVENT = STUTTER -> (__expr7 & __expr12))) & (twork.start <-> __expr11)) & (twork.end <-> __expr13)) & (((((__expr14 -> (__expr2 & next(tcooldown.location) = COOLING)) & (__expr15 -> (tcooldown.location = COOLING & next(tcooldown.location) = OFF))) & (tcooldown.EVENT = STUTTER -> __expr8)) & (tcooldown.start <-> __expr14)) & (tcooldown.end <-> __expr15))) & ((((((cmachine.EVENT = TURN_ON -> ((__expr3 & next(cmachine.location) = IDLE) & __expr16)) & (cmachine.EVENT = RUN -> ((cmachine.location = IDLE & next(cmachine.location) = RUNNING) & __expr16))) & (cmachine.EVENT = FINISH -> ((cmachine.location = RUNNING & next(cmachine.location) = COOLING) & next(cmachine.__CLOCK__c_1) = 0))) & (cmachine.EVENT = COOLED -> ((__expr17 & cmachine.__CLOCK__c_1 >= 10) & __expr16))) & (cmachine.EVENT = COOL -> (__expr17 & next(cmachine.__CLOCK__c_1) = 11))) & (cmachine.EVENT = STUTTER -> (__expr9 & __expr16)))) & ((((((((((((global_clock = next(global_clock) & (__expr11 -> next(work_running_))) & (__expr13 -> !next(work_running_))) & (__expr14 -> next(cooldown_running_))) & (__expr15 -> !next(cooldown_running_))) & (__expr11 <-> cmachine.EVENT = TURN_ON)) & (twork.EVENT = RUN <-> cmachine.EVENT = RUN)) & (__expr13 <-> cmachine.EVENT = FINISH)) & (__expr13 <-> ccontroller.EVENT = WORK_DONE)) & (__expr15 <-> cmachine.EVENT = COOL)) & (ccontroller.EVENT = WORK_DONE -> (__expr4 & next(ccontroller.location) = ON))) & (ccontroller.EVENT = SWITCH_OFF -> ((__expr4 & next(ccontroller.location) = OFF) & global_clock >= 65))) & (ccontroller.EVENT = STUTTER -> __expr10))) & __delta = 0) & (__iota & next(__iota))))
+
+TRANS
+ (!(!__iota | !next(__iota)) | __expr0)
+
+
+
+
+
+
+
+-- Symbols introduced by the dumper:
+DEFINE __expr5 := !work_running_ ;
+
+DEFINE __expr4 := ccontroller.location = ON ;
+
+DEFINE __expr10 := next(ccontroller.location) = ccontroller.location ;
+
+DEFINE __expr7 := next(twork.location) = twork.location ;
+
+DEFINE __expr17 := (__expr6 & next(cmachine.location) = OFF) ;
+
+DEFINE __expr15 := tcooldown.EVENT = COOL_END ;
+
+DEFINE __expr9 := next(cmachine.location) = cmachine.location ;
+
+DEFINE __expr3 := cmachine.location = OFF ;
+
+DEFINE __expr12 := next(twork.__CLOCK__c_2) = twork.__CLOCK__c_2 ;
+
+DEFINE __expr8 := next(tcooldown.location) = tcooldown.location ;
+
+DEFINE __expr6 := cmachine.location = COOLING ;
+
+DEFINE __expr16 := next(cmachine.__CLOCK__c_1) = cmachine.__CLOCK__c_1 ;
+
+DEFINE __expr11 := twork.EVENT = WORK_START ;
+
+DEFINE __expr13 := twork.EVENT = WORK_END ;
+
+DEFINE __expr2 := tcooldown.location = OFF ;
+
+DEFINE __expr14 := tcooldown.EVENT = COOL_START ;
+
+DEFINE __expr1 := twork.location = OFF ;
+
+DEFINE __expr0 := time != next(time) ;
+
