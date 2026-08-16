@@ -1,8 +1,0 @@
-steps := 5;
-
-[start] running := false;
-[start] process_finished := false;
-[start] completed_steps := 0;
-[start] battery := 10;
-
-[end] completed_steps == steps;

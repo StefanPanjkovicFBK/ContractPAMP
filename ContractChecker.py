@@ -1,7 +1,3 @@
-import sys
-sys.path.append('/home/stefan/tamerlite')
-sys.path.insert(0, '/home/stefan/pacti/src')
-
 import z3
 
 import string

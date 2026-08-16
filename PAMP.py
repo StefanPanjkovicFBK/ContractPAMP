@@ -1,6 +1,3 @@
-import sys
-sys.path.insert(1, '/home/stefan/tamerlite')
-
 import argparse
 import pysmt
 from pyvmt.vmtlib.reader import read
@@ -24,7 +21,7 @@ from tamerlite.core import multiqueue_search
 from tamerlite.core import evaluate, make_fluent_node
 from tamerlite.core import HFF, HAdd, CustomHeuristic
 from tamerlite.converter import Converter
-from tamerlite.encoder import Encoder, get_encoders
+from tamerlite.encoder import Encoder
 from tamerlite.core.search import PrioritizedItem
 from tamerlite.core.search_space import OperatorNode
 
